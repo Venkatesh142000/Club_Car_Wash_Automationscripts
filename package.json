@@ -1,0 +1,50 @@
+{
+  "name": "playwright-framework",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:file": "playwright test",
+    "test:grep": "playwright test -g",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:headless": "playwright test --headless",
+    "test:debug": "playwright test --debug",
+    "test:smoke": "playwright test tests/smoke",
+    "test:smoke:tag": "playwright test --grep @smoke",
+    "test:regression:tag": "playwright test --grep @regression",
+    "test:regression": "playwright test tests/regression",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:android": "playwright test --project=android",
+    "test:iphone": "playwright test --project=iphone",
+    "test:ipad": "playwright test --project=ipad",
+    "test:mobile": "playwright test --project=android --project=iphone --project=ipad",
+    "test:parallel": "playwright test --workers=100%",
+    "test:serial": "playwright test --workers=1",
+    "test:rerun-failed": "playwright test --last-failed",
+    "test:ci": "playwright test --reporter=line",
+    "report": "playwright show-report",
+    "trace:open": "playwright show-trace",
+    "pw:install": "playwright install",
+    "pw:install:deps": "playwright install --with-deps",
+    "pw:codegen": "playwright codegen",
+    "clean:results": "rm -rf test-results playwright-report"
+  },
+  "keywords": [],
+  "author": "KishorKumar D",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@faker-js/faker": "^10.4.0",
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^25.3.0",
+    "allure-playwright": "^3.7.1"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "dotenv": "^17.3.1"
+  }
+}
