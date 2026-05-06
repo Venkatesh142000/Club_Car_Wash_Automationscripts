@@ -4,8 +4,8 @@ export default class AddToCart{
         this.page = page;
         this.removeBackPack = page.locator('button[name="remove-sauce-labs-backpack"]');
         this.removeBikeLight = page.locator('button[name="remove-sauce-labs-bike-light"]');
-        this.removeboltTshirt = page.locator('button[name="remove-sauce-labs-bolt-t-shirt"]');
-        this.removefleeceJacket = page.locator('button[name="remove-sauce-labs-fleece-jacket"]');
+        this.removeBoltTshirt = page.locator('button[name="remove-sauce-labs-bolt-t-shirt"]');
+        this.removeFleeceJacket = page.locator('button[name="remove-sauce-labs-fleece-jacket"]');
         this.removeOnesie = page.locator('button[name="remove-sauce-labs-onesie"]');
         this.removeRedTshirt = page.locator('button[name="remove-test.allthethings()-t-shirt-(red)"]');
 

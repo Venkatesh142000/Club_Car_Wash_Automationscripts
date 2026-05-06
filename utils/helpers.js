@@ -889,6 +889,67 @@ export const attachScreenshot = async ({ page }) => {
 	await allure.attachment("Screenshot", screenshot, "image/png");
 };
 
+
+//adding step to allure
+export const allureStep = async (step) => {
+	await allure.step(step, async () => {});
+};
+
+//adding allure label
+export const allureEpicLabel = async (value) => {
+	await allure.label("epic", "Epic:-" + value);
+};
+
+//adding feature label
+export const allureFeatureLabel = async (value) => {
+	await allure.label("feature", "Feature:-" + value);
+};
+
+//allure display name
+export const allureDisplayName = async (value) => {
+	await allure.displayName(value);
+};
+
+//adding story label
+export const allureStoryLabel = async (value) => {
+	await allure.label("story", "Story:-" + value);
+};
+
+//adding severity
+export const allureSeverity = async (severityLevel) => {
+	
+	await allure.severity(severityLevel);
+};
+
+//adding test case
+export const allureTestCase = async (testCaseId, testcase) => {
+	await allure.link(testCaseId, testcase, "tms");
+};
+
+//allure description
+export const allureDescription = async (description) => {
+	await allure.description(description);
+};
+
+//allure screenshot
+export const allureScreenshot = async ({ page }, name) => {
+	await allure.attachment(name, await page.screenshot(), "image/png");
+};
+
+//allure tag
+export const allureTag = async (tag) => {
+	await allure.label("tag", tag);
+};
+
+//allure browser parameter
+export const allureBrowser = async (browserName) => {
+	await allure.parameter("Browser", browserName);
+};
+
+
+
+
+
 /** Grouped default export for all helper functions. */
 const helpers = {
 	sleep,
@@ -952,6 +1013,17 @@ const helpers = {
 	safeJsonParse,
 	retry,
 	runStep,
+	allureStep,
+	allureEpicLabel,
+	allureFeatureLabel,
+	allureDisplayName,
+	allureStoryLabel,
+	allureSeverity,
+	allureTestCase,
+	allureDescription,
+	allureScreenshot,
+	allureTag,
+	allureBrowser,
 };
 
 export default helpers;

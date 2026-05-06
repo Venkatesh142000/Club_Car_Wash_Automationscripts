@@ -44,6 +44,7 @@
     "allure-playwright": "^3.7.1"
   },
   "dependencies": {
+    "axios": "^1.16.0",
     "crypto-js": "^4.2.0",
     "dotenv": "^17.3.1"
   }
