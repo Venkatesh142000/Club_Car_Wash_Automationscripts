@@ -1,5 +1,7 @@
 import {test} from '../fixtures/baseFixture.js';
 import  helpers from '../utils/helpers.js';
+
+import testData from '../testData.json' with { type: 'json' };
 test.describe("Login Functionality",()=>{
 
     test.beforeEach(async()=>{
@@ -14,10 +16,23 @@ test.describe("Login Functionality",()=>{
         await helpers.allureSeverity("blocker");
     });
 
-test("Validate login functionality with valid credentials",async({isMobile,loginPage})=>{
+test("Validate login functionality with valid credentials @smoke",async({isMobile,loginPage})=>{
     
     await loginPage.goto();
-    await loginPage.login(process.env.username,process.env.password);
+  
+    await loginPage.login(testData.users.standard.username,testData.users.standard.password);
+
+
+})
+
+test("Validate login functionality with invalid credentials @regression",async({isMobile,loginPage})=>{
+
+
+    await loginPage.goto();
+    const invalidUsername = testData.users.invalid.invalidUsername;
+    const invalidPassword = testData.users.invalid.invalidPassword;
+    await loginPage.login(invalidUsername,invalidPassword)
+
 
 
 })
