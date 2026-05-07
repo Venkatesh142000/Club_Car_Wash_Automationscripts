@@ -32,9 +32,12 @@ export default class LoginPage {
 	async validateerrorMessage()
 	{
 
-		let messageText=await this.messageError.textContent();
+		const messageText = (await this.messageError.textContent())?.trim() ?? "";
 
-		helpers.assertEqual(messageText, testData.invalidLoginMessage.message);
+		helpers.assertEqual({
+			actual: messageText,
+			expected: testData.invalidLoginMessage.message,
+		});
 		
 
 

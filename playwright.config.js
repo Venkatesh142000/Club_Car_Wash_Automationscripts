@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 // dotenv.config();
 dotenv.config({ quiet: true });
 const DESKTOP_VIEWPORT = { width: 1728, height: 972 };
+const RETRY = Number.parseInt(process.env.RETRY ?? "0", 10);
+const RETRIES = Number.isInteger(RETRY) && RETRY >= 0 ? RETRY : 0;
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -23,8 +25,8 @@ export default defineConfig({
 	// fullyParallel: true,
 	/* Fail the build on CI if you accidentally left test.only in the source code. */
 	forbidOnly: !!process.env.CI,
-	/* Retry on CI only */
-	retries:Number(process.env.RETRY),
+	/* Retry count for both local and CI (value read from RETRY in .env) */
+	retries: RETRIES,
 	/* Opt out of parallel tests on CI. */
 	workers: process.env.CI ? 1 : undefined,
 	/* Reporter to use. See https://playwright.dev/docs/test-reporters */
