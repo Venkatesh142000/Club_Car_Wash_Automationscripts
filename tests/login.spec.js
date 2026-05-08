@@ -9,7 +9,7 @@ test.describe("Login Functionality",()=>{
         await helpers.allureFeatureLabel("Login Module");
         await helpers.allureStoryLabel("Login functionality with valid credentials");
         await helpers.allureStoryLabel("Login functionality with valid credentials");
-        await helpers.allureBrowser(test.info().project.name);
+       
         await helpers.allureTag("smoke");
         await helpers.allureTestCase("1","Login positive test case");
         await helpers.allureDisplayName("validate the test case");
@@ -18,6 +18,7 @@ test.describe("Login Functionality",()=>{
 
 test("Validate login functionality with valid credentials @smoke",async({isMobile,loginPage})=>{
     
+     await helpers.allureBrowser(test.info().project.name);
     await loginPage.goto();
   
     await loginPage.login(testData.users.standard.username,testData.users.standard.password);
@@ -27,6 +28,7 @@ test("Validate login functionality with valid credentials @smoke",async({isMobil
 
 test("Validate login functionality with invalid credentials @regression",async({isMobile,loginPage})=>{
 
+     await helpers.allureBrowser(test.info().project.name);
 
     await loginPage.goto();
     const invalidUsername = testData.users.invalid.invalidUsername;
