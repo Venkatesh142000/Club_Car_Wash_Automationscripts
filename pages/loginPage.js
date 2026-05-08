@@ -1,5 +1,8 @@
 import { expect } from "../fixtures/baseFixture.js";
-import { assertText, click, getEnv, waitForNavigationAfterAction } from "../utils/helpers.js";
+import helpers from "../utils/helpers.js";
+import testData from "../testData.json" with { type: "json" };
+
+
 export default class LoginPage {
 	constructor(page, isMobile = false) {
 		this.page = page;
@@ -12,12 +15,12 @@ export default class LoginPage {
 		this.hamburger = page.locator(".bm-burger-button");
 		this.createAccountText = page.locator("h1:has-text('CREATE ACCOUNT')");
 		this.fieldRequiredText = page.locator("text=This field is required.");
+		this.messageError=page.locator("h3[data-test='error']");
 	}
 
 	async goto() {
 
-    	console.log(getEnv({ key: "BASE_URL" }))
-		await this.page.goto(getEnv({ key: "BASE_URL" }));
+		await this.page.goto(helpers.getEnv({ key: "BASE_URL" }));
 	}
 
 	async login(username, password) {
@@ -25,4 +28,20 @@ export default class LoginPage {
 		await this.passwordInput.fill(password);
 		await this.loginButton.click();
 	}
+
+	async validateerrorMessage()
+	{
+
+		const messageText = (await this.messageError.textContent())?.trim() ?? "";
+
+		helpers.assertEqual({
+			actual: messageText,
+			expected: testData.invalidLoginMessage.message,
+		});
+		
+
+
+	}
+
+	
 }
