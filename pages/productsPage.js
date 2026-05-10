@@ -1,3 +1,5 @@
+import { click } from "../utils/helpers";
+
 export default class Products{
 
     constructor(page){
@@ -22,56 +24,84 @@ export default class Products{
     }
 
     async openBackPackProduct(){
-        await  this.backup.click();
+        await click({
+            locator: this.backup
+        });
     }
 
     async openBoltTshirtProduct(){
-        await  this.boltTshirt.click();
+        await click({
+            locator: this.boltTshirt
+        });
     }
 
     async openOnesieProduct(){
-        await  this.oneSie.click();
+        await click({
+            locator: this.oneSie
+        });
     }
     async openBikeLightProduct(){
-        await  this.bikeLight.click();
+        await click({
+            locator: this.bikeLight
+        });
     }
     async openFleeceJacketProduct(){
-        await  this.fleeceJacket.click();
+        await click({
+            locator: this.fleeceJacket
+        });
     }
     async openRedTshirtProduct(){
-        await  this.redTShirt.click();
+        await click({
+            locator: this.redTShirt
+        });
     }
     
     async clickPdpAddToCart(){
-        await this.pdp_atc.click();
+        await click({
+            locator: this.pdp_atc
+        });
     }
 
     async addBackPackToCart(){
-        await this.backup_atc.click();
+        await click({
+            locator: this.backup_atc
+        });
     }
 
     async addBoltTshirtToCart(){
-        await this.boltTshirt_atc.click();
+        await click({
+            locator: this.boltTshirt_atc
+        });
     }
 
     async addOnesieToCart(){
-        await this.oneSie_atc.click();
+        await click({
+            locator: this.oneSie_atc
+        });
     }
 
     async addFleeceJacketToCart(){
-        await this.fleeceJacket_atc.click();
+        await click({
+            locator: this.fleeceJacket_atc
+        });
     }
 
     async addBikeLightToCart(){
-        await this.bikeLight_atc.click();
+        await click({
+            locator: this.bikeLight_atc
+        });
     }
 
     async addRedTshirtToCart(){
-        await this.redTShirt_atc.click();
+        await click({
+            locator: this.redTShirt_atc
+        });
     }
 
     async clickCartIcon(){
-        await this.shopping_cart.click();
+        await click({
+            locator: this.shopping_cart
+        });
     }
 
 }

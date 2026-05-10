@@ -1,29 +1,26 @@
-import { test } from '../fixtures/baseFixture.js';
+import { test ,expect} from '../fixtures/baseFixture.js';
 import LoginPage from "../pages/loginPage.js";
 import ProductsPage from "../pages/productsPage.js";
 import AddToCartPage from "../pages/addToCartPage.js";
 import CheckOutPage from "../pages/checkOutPage.js";
 
-test('Booking Flow',async({page})=>{
-     test.setTimeout(60000);
-    const loginPage = new LoginPage(page);
+test('Booking Flow',async({loginPage,productPage,addToCartPage,checkOutPage,cust_deatils})=>{
+    
     await loginPage.goto()
 	await loginPage.login(process.env.username, process.env.password);
 
-    const plp = new ProductsPage(page);
-    await plp.addBackPackToCart();
-    await plp.addOnesieToCart();
-    await plp.addFleeceJacketToCart();
-    await plp.clickCartIcon();
+    await productPage.addBackPackToCart();
+    await productPage.addOnesieToCart();
+    await productPage.addFleeceJacketToCart();
+    await productPage.clickCartIcon();
 
-    const cart = new AddToCartPage(page);
-    await cart.removeProductOnesie();
-    await cart.clickCheckout();
+    await addToCartPage.removeProductOnesie();
+    await addToCartPage.clickCheckout();
 
-    const checkout = new CheckOutPage(page);
-    await checkout.enterformDetails('Test','T','345433');
-    await checkout.clickContinue();
-    await checkout.clickFinish();
-    await checkout.orderSuccessPage();
+    await checkOutPage.enterformDetails(cust_deatils.firstName,cust_deatils.lastName,cust_deatils.postalCode);
+    await checkOutPage.clickContinue();
+    await checkOutPage.clickFinish();
+    const isOrderSuccess = await checkOutPage.orderSuccessPage();
+    expect(isOrderSuccess).toBe(true);
     
 })
