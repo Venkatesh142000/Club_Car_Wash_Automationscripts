@@ -34,11 +34,10 @@ export const test = base.extend({
 		await use(productPage)
 	},
 
-	cust_deatils : async({page,isMobile},use)=>{
-		const cust_deatils = generateCheckoutCustomer()
-		await use(cust_deatils)
+	cust_details : async({page,isMobile},use)=>{
+		const cust_details = generateCheckoutCustomer()
+		await use(cust_details)
 	}
-
 	
 });
 

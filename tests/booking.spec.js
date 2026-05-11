@@ -1,10 +1,6 @@
 import { test ,expect} from '../fixtures/baseFixture.js';
-import LoginPage from "../pages/loginPage.js";
-import ProductsPage from "../pages/productsPage.js";
-import AddToCartPage from "../pages/addToCartPage.js";
-import CheckOutPage from "../pages/checkOutPage.js";
 
-test('Booking Flow',async({loginPage,productPage,addToCartPage,checkOutPage,cust_deatils})=>{
+test('Booking Flow',async({loginPage,productPage,addToCartPage,checkOutPage,cust_details})=>{
     
     await loginPage.goto()
 	await loginPage.login(process.env.username, process.env.password);
@@ -17,7 +13,7 @@ test('Booking Flow',async({loginPage,productPage,addToCartPage,checkOutPage,cust
     await addToCartPage.removeProductOnesie();
     await addToCartPage.clickCheckout();
 
-    await checkOutPage.enterformDetails(cust_deatils.firstName,cust_deatils.lastName,cust_deatils.postalCode);
+    await checkOutPage.enterformDetails(cust_details.firstName,cust_details.lastName,cust_details.postalCode);
     await checkOutPage.clickContinue();
     await checkOutPage.clickFinish();
     const isOrderSuccess = await checkOutPage.orderSuccessPage();

@@ -45,9 +45,9 @@ export default class AddToCart{
         });
     }
 
-    async removeProductBoltTshirt(){
+    async removeProductRedTshirt(){
         await click({
-            locator: this.removeboltTshirt
+            locator: this.removeRedTshirt
         });
     }
 
