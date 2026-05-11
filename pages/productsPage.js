@@ -1,4 +1,4 @@
-import { click } from "../utils/helpers";
+import { click } from "../utils/helpers.js";
 
 export default class Products{
 

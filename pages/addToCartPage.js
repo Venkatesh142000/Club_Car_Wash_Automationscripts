@@ -1,4 +1,4 @@
-import { click } from "../utils/helpers";
+import { click } from "../utils/helpers.js";
 
 export default class AddToCart{
 
@@ -35,7 +35,7 @@ export default class AddToCart{
 
     async removeProductFleeceJacket(){
         await click({
-            locator: this.removefleeceJacket
+            locator: this.removeFleeceJacket
         });
     }
 

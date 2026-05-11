@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { isVisible , click } from '../utils/helpers';
+import { isVisible , click } from '../utils/helpers.js';
 
 export default class CheckOut{
 
