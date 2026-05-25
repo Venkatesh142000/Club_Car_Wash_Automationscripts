@@ -49,7 +49,7 @@
     "pw:install": "playwright install",
     "pw:install:deps": "playwright install --with-deps",
     "pw:codegen": "playwright codegen",
-    "clean:results": "rm -rf test-results playwright-report",
+    "clean:results": "rm -rf test-results playwright-report"
   },
   "keywords": [],
   "author": "KishorKumar D",
@@ -65,6 +65,5 @@
     "axios": "^1.16.0",
     "crypto-js": "^4.2.0",
     "dotenv": "^17.4.2"
-    "dotenv": "^17.4.2",
   }
 }
