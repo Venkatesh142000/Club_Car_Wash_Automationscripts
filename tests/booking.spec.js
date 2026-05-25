@@ -8,7 +8,7 @@ test('Booking Flow',async({page})=>{
      test.setTimeout(60000);
     const loginPage = new LoginPage(page);
     await loginPage.goto()
-	await loginPage.login(process.env.username, process.env.password);
+    await loginPage.login(process.env.username, process.env.password);
 
     const plp = new ProductsPage(page);
     await plp.addBackPackToCart();

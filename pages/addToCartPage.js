@@ -22,19 +22,15 @@ export default class AddToCart{
     }
 
     async removeProductBoltTshirt(){
-        await this.removeboltTshirt.click();
+        await this.removeBoltTshirt.click();
     }
 
     async removeProductFleeceJacket(){
-        await this.removefleeceJacket.click();
+        await this.removeFleeceJacket.click();
     }
 
     async removeProductOnesie(){
         await this.removeOnesie.click();
-    }
-
-    async removeProductBoltTshirt(){
-        await this.removeboltTshirt.click();
     }
 
     async clickContinue(){
