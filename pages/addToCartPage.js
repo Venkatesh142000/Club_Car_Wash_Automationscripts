@@ -1,3 +1,5 @@
+import { click } from "../utils/helpers.js";
+
 export default class AddToCart{
 
     constructor(page){
@@ -14,30 +16,50 @@ export default class AddToCart{
     }
 
     async removeProductBackPack(){
-        await this.removeBackPack.click();
+        await click({
+            locator: this.removeBackPack
+        });
     }
 
     async removeProductBikeLight(){
-        await this.removeBikeLight.click();
+        await click({
+            locator: this.removeBikeLight
+        });
     }
 
     async removeProductBoltTshirt(){
-        await this.removeBoltTshirt.click();
+        await click({
+            locator: this.removeboltTshirt
+        });
     }
 
     async removeProductFleeceJacket(){
-        await this.removeFleeceJacket.click();
+        await click({
+            locator: this.removeFleeceJacket
+        });
     }
 
     async removeProductOnesie(){
-        await this.removeOnesie.click();
+        await click({
+            locator: this.removeOnesie
+        });
+    }
+
+    async removeProductRedTshirt(){
+        await click({
+            locator: this.removeRedTshirt
+        });
     }
 
     async clickContinue(){
-        await this.continueShopping.click();
+        await click({
+            locator: this.continueShopping
+        });
     }
 
     async clickCheckout(){
-        await this.checkout.click();
+        await click({
+            locator: this.checkout
+        });
     }
 }

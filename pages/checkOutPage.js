@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { isVisible , click } from '../utils/helpers.js';
 
 export default class CheckOut{
 
@@ -21,18 +22,26 @@ export default class CheckOut{
     }
 
     async clickCancel(){
-       await this.cancel.click();
+       await click({
+           locator: this.cancel
+       });
     }
 
     async clickContinue(){
-       await this.continue.click();
+        await click({
+            locator: this.continue
+        });
     }
 
     async clickFinish(){
-        await this.finish.click();
+        await click({
+            locator: this.finish
+        });
     }
 
     async orderSuccessPage(){
-        await expect(this.backHome).toBeVisible();
+        return await isVisible({
+            locator: this.backHome
+         });
     }
 }
