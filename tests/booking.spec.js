@@ -3,7 +3,7 @@ import { test ,expect} from '../fixtures/baseFixture.js';
 test('Booking Flow',async({loginPage,productPage,addToCartPage,checkOutPage,cust_details})=>{
     
     await loginPage.goto()
-	await loginPage.login(process.env.username, process.env.password);
+    await loginPage.login(process.env.username, process.env.password);
 
     await productPage.addBackPackToCart();
     await productPage.addOnesieToCart();

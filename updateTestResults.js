@@ -13,13 +13,15 @@ const {
 } = process.env;
 
 const RESULTS_FILE = "results.xml";
+const CLIENT_ID = XRAY_CLIENT_ID?.trim();
+const CLIENT_SECRET = XRAY_CLIENT_SECRET?.trim();
 const TEST_EXEC_KEY = XRAY_TEST_EXEC_KEY?.trim();
 const REGION = XRAY_REGION?.trim();
 const BASE_URL = XRAY_BASE_URL?.trim() || `https://${REGION ? `${REGION}.` : ""}xray.cloud.getxray.app/api/v2`;
 
 // 🔹 Validate config
 function validateConfig() {
-  if (!XRAY_CLIENT_ID || !XRAY_CLIENT_SECRET) {
+  if (!CLIENT_ID || !CLIENT_SECRET) {
     throw new Error("XRAY_CLIENT_ID and XRAY_CLIENT_SECRET are required");
   }
   if (!BASE_URL) {
@@ -33,8 +35,8 @@ function validateConfig() {
 // 🔹 Get auth token
 async function getAuthToken() {
   const res = await axios.post(`${BASE_URL}/authenticate`, {
-    client_id: XRAY_CLIENT_ID,
-    client_secret: XRAY_CLIENT_SECRET
+    client_id: CLIENT_ID,
+    client_secret: CLIENT_SECRET
   });
 
   return res.data.replace(/"/g, "");
@@ -59,7 +61,7 @@ function parseJUnit(xml) {
     /<testcase\b([^>]*)>([\s\S]*?)<\/testcase>|<testcase\b([^>]*)\/>/g;
 
   const nameRegex = /name="([^"]+)"/;
-  const keyRegex = /^([A-Z][A-Z0-9]+-\d+)/;
+  const keyRegex = /\b([A-Z][A-Z0-9]+-\d+)\b/;
 
   const tests = [];
   let match;
