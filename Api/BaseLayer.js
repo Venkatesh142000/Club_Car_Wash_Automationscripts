@@ -7,15 +7,15 @@ export class ApiBase {
 
   static async createAPIContext() {
 
-    const tokenValue = process.env.tokenValue;
-    const baseUrl = process.env.baseUrl;
+    const tokenValue = process.env.TOKEN_VALUE;
+    const baseUrl = process.env.BASE_URL;
 
     if (!baseUrl) {
-      throw new Error('Environment variable baseUrl is required for API context creation.');
+      throw new Error('Environment variable BASE_URL is required for API context creation.');
     }
 
     if (!tokenValue) {
-      throw new Error('Environment variable tokenValue is required for API context creation.');
+      throw new Error('Environment variable TOKEN_VALUE is required for API context creation.');
     }
 
     const apiContext = await request.newContext({

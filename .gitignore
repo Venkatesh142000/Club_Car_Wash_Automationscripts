@@ -12,3 +12,4 @@ allure-report/
 testData.json
 package-lock.json
 results.xml
+.DS_Store

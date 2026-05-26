@@ -16,7 +16,7 @@ export class ApiClient {
 
   
   async delete(endpoint) {
-    return this.deleteResource(endpoint);
+    return await this.apiContext.delete(endpoint);
   }
 
   async put(endpoint, data) {

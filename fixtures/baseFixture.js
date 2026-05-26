@@ -43,9 +43,13 @@ export const test = base.extend({
 	},
 
 apiContext: async (_, use) => {
-    const context = await ApiBase.createAPIContext();
-    await use(context);
-  },
+		const context = await ApiBase.createAPIContext();
+		try {
+			await use(context);
+		} finally {
+			await context.dispose();
+		}
+	},
 
   apiClient: async ({ apiContext }, use) => {
     const client = new ApiClient(apiContext);
