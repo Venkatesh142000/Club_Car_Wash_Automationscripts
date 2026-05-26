@@ -4,6 +4,9 @@ import AddToCart from "../pages/addToCartPage.js";
 import CheckOut from "../pages/checkOutPage.js"
 import Products from "../pages/productsPage.js"
 import {generateCheckoutCustomer} from "../utils/fakerHelper.js";
+import {ApiBase} from '../Api/BaseLayer.js';
+import { ApiClient } from '../Api/clientLayer.js';
+import { PayloadBuilder } from '../utils/payLoadBuilder.js';
 
 export const test = base.extend({
 	
@@ -37,7 +40,23 @@ export const test = base.extend({
 	cust_details : async({page,isMobile},use)=>{
 		const cust_details = generateCheckoutCustomer()
 		await use(cust_details)
-	}
+	},
+
+apiContext: async (_, use) => {
+    const context = await ApiBase.createAPIContext();
+    await use(context);
+  },
+
+  apiClient: async ({ apiContext }, use) => {
+    const client = new ApiClient(apiContext);
+    await use(client);
+  },
+
+  payLoader: async (_, use) => {
+    const payLoader = new PayloadBuilder();
+    await use(payLoader);
+  },
+
 	
 });
 
