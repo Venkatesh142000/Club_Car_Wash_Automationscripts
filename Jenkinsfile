@@ -5,7 +5,7 @@ pipeline {
 
     tools {
         nodejs 'NodeJS'
-        git 'Default'
+        git 'GitPath'
     }
 
     environment {
