@@ -13,6 +13,7 @@ pipeline {
         GITHUB_REPO        = 'AutomationReport'
         ONEDRIVE_FOLDER    = '/Users/kalaltejavardhangoud/Library/CloudStorage/OneDrive-CDW/AutomationReport'
         MAX_BUILDS_TO_KEEP = '4'
+        PLAYWRIGHT_SCRIPT  = 'test:jenkins'
         TEAMS_WEBHOOK_URL  = credentials('teams-webhook-id')
         PATH               = "/opt/homebrew/bin:/usr/local/bin:/bin:/usr/bin:${env.PATH}"
     }
@@ -65,7 +66,8 @@ pipeline {
         stage('Run Playwright Tests') {
             steps {
                 sh '''
-                    npx playwright test --reporter=allure-playwright || true
+                    echo "Running npm script: ${PLAYWRIGHT_SCRIPT}"
+                    CI=true npm run ${PLAYWRIGHT_SCRIPT} || true
                     echo "Playwright tests completed"
                 '''
             }

@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
+    "test:jenkins": "playwright test --project=chromium",
     "test:file": "playwright test",
     "test:grep": "playwright test -g",
     "test:ui": "playwright test --ui",
