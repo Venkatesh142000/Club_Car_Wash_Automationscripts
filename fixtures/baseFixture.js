@@ -42,7 +42,7 @@ export const test = base.extend({
 		await use(cust_details)
 	},
 
-apiContext: async (_, use) => {
+	apiContext: async ({}, use) => {
 		const context = await ApiBase.createAPIContext();
 		try {
 			await use(context);
@@ -56,7 +56,7 @@ apiContext: async (_, use) => {
     await use(client);
   },
 
-  payLoader: async (_, use) => {
+	  payLoader: async ({}, use) => {
     const payLoader = new PayloadBuilder();
     await use(payLoader);
   },
