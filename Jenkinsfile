@@ -437,9 +437,9 @@ pipeline {
                 '</td></tr></table></td></tr></table></body></html>'
 
                 emailext(
-                    subject: "${statusIcon} AUTOMATION PHASE Test REPORT: ${displayResult} | Build #${env.BUILD_NUMBER} | Passed: ${passed}/${total}",
+                    subject: "${statusIcon} AUTOMATION PHASE 2 REPORT: ${displayResult} | Build #${env.BUILD_NUMBER} | Passed: ${passed}/${total}",
                     mimeType: 'text/html',
-                    to: 'tejavardhangoud.kalal@cdw.com,karthikeyan.jegadeesan@cdw.com,kishorkumar.dhanabose@cdw.com,Vivekanandan.Raju@cdw.com,sugantha.mani@cdw.com',
+                    to: 'sugantha.mani@cdw.com,Vivekanandan.Raju@cdw.com,karthikeyan.jegadeesan@cdw.com,kishorkumar.dhanabose@cdw.com,tejavardhangoud.kalal@cdw.com',
                     attachmentsPattern: 'allure-report.zip',
                     body: emailBody
                 )
