@@ -19,8 +19,12 @@ export default class LoginPage {
 	}
 
 	async goto() {
+		const baseUrl = helpers.getEnv({ key: "BASE_URL" }).trim();
+		if (!baseUrl) {
+			throw new Error("BASE_URL is not set. Configure it in Jenkins or your local environment before running tests.");
+		}
 
-		await this.page.goto(helpers.getEnv({ key: "BASE_URL" }));
+		await this.page.goto(baseUrl);
 	}
 
 	async login(username, password) {

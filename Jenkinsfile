@@ -9,6 +9,7 @@ pipeline {
     }
 
     environment {
+        BASE_URL           = 'https://www.saucedemo.com/'
         GITHUB_USER        = 'tejavardhangoud'
         GITHUB_REPO        = 'AutomationReport'
         ONEDRIVE_FOLDER    = '/Users/kalaltejavardhangoud/Library/CloudStorage/OneDrive-CDW/AutomationReport'
@@ -67,6 +68,7 @@ pipeline {
             steps {
                 sh '''
                     echo "Running npm script: ${PLAYWRIGHT_SCRIPT}"
+                    echo "BASE_URL=${BASE_URL}"
                     CI=true npm run ${PLAYWRIGHT_SCRIPT} || true
                     echo "Playwright tests completed"
                 '''
