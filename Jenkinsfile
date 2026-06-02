@@ -144,29 +144,29 @@ pipeline {
         }
 
         stage('Publish Report to GitHub Pages') {
-    steps {
-        withCredentials([usernamePassword(credentialsId: 'AutomationReport', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
-            sh '''
-                echo "Publishing Allure report to GitHub Pages..."
-                rm -rf /tmp/allure-gh-pages
-                cp -r ${WORKSPACE}/allure-report /tmp/allure-gh-pages
-                cd /tmp/allure-gh-pages
-                git init
-                git config user.email "jenkins@automation.com"
-                git config user.name "Jenkins CI"
-                git checkout -b gh-pages
-                git add .
-                git commit -m "Allure Report - Build ${BUILD_NUMBER} - $(date \'+%Y-%m-%d %H:%M\')"
-                git push -f https://${GH_USER}:${GH_TOKEN}@github.com/tejavardhangoud/AutomationReport.git gh-pages
-                echo "Report published!"
-                rm -rf /tmp/allure-gh-pages
-            '''
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'AutomationReport', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
+                    sh '''
+                        echo "Publishing Allure report to GitHub Pages..."
+                        rm -rf /tmp/allure-gh-pages
+                        cp -r ${WORKSPACE}/allure-report /tmp/allure-gh-pages
+                        cd /tmp/allure-gh-pages
+                        git init
+                        git config user.email "jenkins@automation.com"
+                        git config user.name "Jenkins CI"
+                        git checkout -b gh-pages
+                        git add .
+                        git commit -m "Allure Report - Build ${BUILD_NUMBER} - $(date \'+%Y-%m-%d %H:%M\')"
+                        git push -f https://${GH_USER}:${GH_TOKEN}@github.com/tejavardhangoud/AutomationReport.git gh-pages
+                        echo "Report published!"
+                        rm -rf /tmp/allure-gh-pages
+                    '''
+                }
+                script {
+                    env.REPORT_URL = "https://tejavardhangoud.github.io/AutomationReport/"
+                }
+            }
         }
-        script {
-            env.REPORT_URL = "https://tejavardhangoud.github.io/AutomationReport/"
-        }
-    }
-}
 
         stage('Publish Allure Report in Jenkins') {
             steps {
@@ -192,7 +192,6 @@ pipeline {
                 def testDur        = env.TEST_DURATION  ?: 'N/A'
                 def reportUrl      = env.REPORT_URL     ?: 'https://tejavardhangoud.github.io/AutomationReport/'
                 def jenkinsUrl     = env.BUILD_URL      ?: ''
-                def oneDriveFolder = env.ONEDRIVE_BUILD_FOLDER ?: env.ONEDRIVE_FOLDER
                 def githubPagesUrl = "https://${env.GITHUB_USER}.github.io/${env.GITHUB_REPO}"
                 def buildDate      = new Date().format('dd MMM yyyy, hh:mm a')
 
@@ -229,6 +228,15 @@ pipeline {
                                   : (currentBuild.result == 'FAILURE')     ? '❌'
                                   : '⚠️'
 
+                // ── PIE CHART URL ──────────────────────────────────────────────────────────
+                // backgroundColor=white forces white PNG canvas — immune to Teams/Outlook
+                // dark mode because it is a pre-rendered image, not a themed element.
+                def chartConfig = """{type:'pie',data:{labels:['Passed','Failed','Broken','Skipped'],datasets:[{data:[${passed},${failed},${broken},${skipped}],backgroundColor:['#2ecc71','#e74c3c','#f39c12','#95a5a6'],borderColor:'#ffffff',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{color:'#333333',font:{size:13,weight:'bold'},padding:16,boxWidth:16}},datalabels:{color:'#ffffff',font:{weight:'bold',size:15},formatter:(value,ctx)=>{if(value===0)return'';let sum=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);return value+'('+Math.round((value/sum)*100)+'%)';}}}}}}"""
+
+                def chartUrl = "https://quickchart.io/chart?backgroundColor=white&width=480&height=380&c=" +
+                               java.net.URLEncoder.encode(chartConfig, 'UTF-8')
+
+                // ── TEAMS ADAPTIVE CARD ────────────────────────────────────────────────────
                 def teamsCard = [
                     type: "message",
                     attachments: [
@@ -241,6 +249,7 @@ pipeline {
                                 version: "1.4",
                                 msteams: [width: "full"],
                                 body: [
+                                    // HEADER
                                     [
                                         type: "ColumnSet",
                                         style: (isPartiallyPassed ? "warning" : currentBuild.result == 'SUCCESS' ? "good" : currentBuild.result == 'FAILURE' ? "attention" : "warning"),
@@ -250,15 +259,16 @@ pipeline {
                                                 type: "Column",
                                                 width: "stretch",
                                                 items: [
-                                                    [type: "TextBlock", text: "AUTOMATION PHASE 2 REPORT", weight: "Bolder", size: "Large", color: "Dark", horizontalAlignment: "Center", spacing: "Medium"],
-                                                    [type: "TextBlock", text: "Build #${env.BUILD_NUMBER}  |  ${buildDate}", size: "Small", color: "Dark", horizontalAlignment: "Center", spacing: "None"]
+                                                    [type: "TextBlock", text: "AUTOMATION PHASE 2 REPORT", weight: "Bolder", size: "Large", color: "Light", horizontalAlignment: "Center", spacing: "Medium"],
+                                                    [type: "TextBlock", text: "Build #${env.BUILD_NUMBER}  |  ${buildDate}", size: "Small", color: "Light", horizontalAlignment: "Center", spacing: "None"]
                                                 ]
                                             ]
                                         ]
                                     ],
+                                    // STATUS
                                     [
                                         type: "TextBlock",
-                                        text: "${displayResult}",
+                                        text: "${statusIcon}  ${displayResult}",
                                         weight: "Bolder",
                                         size: "ExtraLarge",
                                         color: (isPartiallyPassed ? "Warning" : currentBuild.result == 'SUCCESS' ? "Good" : currentBuild.result == 'FAILURE' ? "Attention" : "Warning"),
@@ -274,6 +284,7 @@ pipeline {
                                         horizontalAlignment: "Center",
                                         spacing: "None"
                                     ],
+                                    // PIE CHART
                                     [
                                         type: "TextBlock",
                                         text: "TEST RESULTS SUMMARY",
@@ -283,32 +294,62 @@ pipeline {
                                         separator: true
                                     ],
                                     [
+                                        type: "Image",
+                                        url: "${chartUrl}",
+                                        altText: "Test Results Pie Chart — Passed:${passed} Failed:${failed} Broken:${broken} Skipped:${skipped}",
+                                        size: "Large",
+                                        horizontalAlignment: "Center",
+                                        spacing: "Small"
+                                    ],
+                                    // STATS BELOW CHART
+                                    [
                                         type: "ColumnSet",
+                                        spacing: "Small",
                                         columns: [
                                             [
                                                 type: "Column",
                                                 width: "stretch",
                                                 items: [
-                                                    [type: "TextBlock", text: "✅ Passed",  weight: "Bolder", color: "Good",      spacing: "None"],
-                                                    [type: "TextBlock", text: "❌ Failed",  weight: "Bolder", color: "Attention", spacing: "Small"],
-                                                    [type: "TextBlock", text: "💥 Broken",  weight: "Bolder", color: "Warning",   spacing: "Small"],
-                                                    [type: "TextBlock", text: "⏭️ Skipped", weight: "Bolder",                     spacing: "Small"],
-                                                    [type: "TextBlock", text: "📋 Total",   weight: "Bolder",                     spacing: "Small"]
+                                                    [type: "TextBlock", text: "✅ Passed",  weight: "Bolder", color: "Good",      spacing: "Small"],
+                                                    [type: "TextBlock", text: "❌ Failed",  weight: "Bolder", color: "Attention", spacing: "Small"]
                                                 ]
                                             ],
                                             [
                                                 type: "Column",
                                                 width: "auto",
                                                 items: [
-                                                    [type: "TextBlock", text: "${passed}",  weight: "Bolder", color: "Good",      horizontalAlignment: "Right", spacing: "None"],
-                                                    [type: "TextBlock", text: "${failed}",  weight: "Bolder", color: "Attention", horizontalAlignment: "Right", spacing: "Small"],
-                                                    [type: "TextBlock", text: "${broken}",  weight: "Bolder", color: "Warning",   horizontalAlignment: "Right", spacing: "Small"],
-                                                    [type: "TextBlock", text: "${skipped}", weight: "Bolder",                     horizontalAlignment: "Right", spacing: "Small"],
-                                                    [type: "TextBlock", text: "${total}",   weight: "Bolder",                     horizontalAlignment: "Right", spacing: "Small"]
+                                                    [type: "TextBlock", text: "${passed} (${passRate}%)", weight: "Bolder", color: "Good",      horizontalAlignment: "Right", spacing: "Small"],
+                                                    [type: "TextBlock", text: "${failed} (${failRate}%)", weight: "Bolder", color: "Attention", horizontalAlignment: "Right", spacing: "Small"]
+                                                ]
+                                            ],
+                                            [
+                                                type: "Column",
+                                                width: "stretch",
+                                                items: [
+                                                    [type: "TextBlock", text: "💥 Broken",  weight: "Bolder", color: "Warning", spacing: "Small"],
+                                                    [type: "TextBlock", text: "⏭️ Skipped", weight: "Bolder",                   spacing: "Small"]
+                                                ]
+                                            ],
+                                            [
+                                                type: "Column",
+                                                width: "auto",
+                                                items: [
+                                                    [type: "TextBlock", text: "${broken} (${brokenRate}%)",  weight: "Bolder", color: "Warning", horizontalAlignment: "Right", spacing: "Small"],
+                                                    [type: "TextBlock", text: "${skipped} (${skipRate}%)",   weight: "Bolder",                   horizontalAlignment: "Right", spacing: "Small"]
                                                 ]
                                             ]
                                         ]
                                     ],
+                                    [
+                                        type: "TextBlock",
+                                        text: "📋 Total: ${total} Tests  |  ⏱️ Duration: ${testDur}",
+                                        weight: "Bolder",
+                                        size: "Small",
+                                        horizontalAlignment: "Center",
+                                        spacing: "Small",
+                                        separator: true
+                                    ],
+                                    // BUILD INFO
                                     [
                                         type: "TextBlock",
                                         text: "BUILD INFORMATION",
@@ -331,6 +372,7 @@ pipeline {
                                             [title: "Date and Time", value: "${buildDate}"]
                                         ]
                                     ],
+                                    // REPORT LINKS
                                     [
                                         type: "TextBlock",
                                         text: "REPORT LINKS",
@@ -348,7 +390,7 @@ pipeline {
                                     ]
                                 ],
                                 actions: [
-                                    [type: "Action.OpenUrl", title: "View Allure Report", url: "${githubPagesUrl}", style: "positive"]
+                                    [type: "Action.OpenUrl", title: "📊 View Allure Report", url: "${githubPagesUrl}", style: "positive"]
                                 ]
                             ]
                         ]
@@ -368,73 +410,165 @@ pipeline {
                     rm -f /tmp/teams_payload.json
                 '''
 
-                def emailBody = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><title>AUTOMATION PHASE 2 REPORT</title></head>' +
-                '<body style="margin:0; padding:0; background-color:#f0f2f5; font-family:\'Segoe UI\', Arial, sans-serif;">' +
-                '<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0f2f5" style="background-color:#f0f2f5; padding:32px 0;">' +
-                '<tr><td align="center">' +
-                '<table width="640" cellpadding="0" cellspacing="0" style="border-radius:12px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.10);">' +
-                '<tr><td bgcolor="#16213e" style="background-color:#16213e; padding:32px 40px; text-align:center;">' +
-                '<p style="margin:0 0 6px 0; font-size:12px; letter-spacing:3px; text-transform:uppercase; color:#aabbdd; font-family:\'Segoe UI\', Arial, sans-serif;">Regression Test Suite</p>' +
-                '<h1 style="margin:0; font-size:30px; font-weight:700; color:#61dafb; font-family:\'Segoe UI\', Arial, sans-serif;">AUTOMATION PHASE 2 REPORT</h1>' +
-                '<p style="margin:10px 0 0; font-size:14px; color:#aabbdd; font-family:\'Segoe UI\', Arial, sans-serif;">Build &nbsp;<span style="color:#61dafb; font-weight:700;">#' + env.BUILD_NUMBER + '</span>&nbsp;&bull;&nbsp;<span style="color:#aabbdd;">' + gitBranch + ' @ ' + gitCommit + '</span></p>' +
-                '</td></tr>' +
-                '<tr><td bgcolor="#ffffff" style="background-color:#ffffff; padding:24px 40px 8px; text-align:center;">' +
-                '<table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>' +
-                '<td bgcolor="' + statusBgColor + '" style="background-color:' + statusBgColor + '; border-radius:50px; border:2px solid ' + statusColor + '; padding:8px 28px;">' +
-                '<span style="color:' + statusColor + '; font-size:15px; font-weight:700; letter-spacing:1px; text-transform:uppercase; font-family:\'Segoe UI\', Arial, sans-serif;">' + statusIcon + ' &nbsp; ' + displayResult + '</span>' +
-                '</td></tr></table></td></tr>' +
-                '<tr><td bgcolor="#ffffff" style="background-color:#ffffff; padding:16px 40px 32px;">' +
-                '<table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0 16px;"><tr>' +
-                '<td bgcolor="#1e8449" style="background-color:#1e8449; border-radius:10px; padding:20px; text-align:center;">' +
-                '<p style="margin:0 0 12px 0; font-size:14px; font-weight:700; color:#ffffff; font-family:\'Segoe UI\', Arial, sans-serif;">Full Interactive Allure Report &mdash; Opens in Browser</p>' +
-                '<table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>' +
-                '<td bgcolor="#ffffff" style="background-color:#ffffff; border-radius:8px; padding:0;">' +
-                '<a href="' + reportUrl + '" style="display:inline-block; padding:12px 32px; color:#1e8449; font-size:14px; font-weight:700; text-decoration:none; font-family:\'Segoe UI\', Arial, sans-serif;">Click Here to View Report</a>' +
-                '</td></tr></table>' +
-                '<p style="margin:12px 0 0; font-size:11px; color:#d5f5e3; font-family:\'Segoe UI\', Arial, sans-serif;">' + reportUrl + '</p>' +
-                '</td></tr></table>' +
-                '<p style="margin:20px 0 6px; font-size:13px; font-weight:600; color:#555; letter-spacing:0.5px; text-transform:uppercase; font-family:\'Segoe UI\', Arial, sans-serif;">Pass Rate &nbsp;<span style="font-size:20px; color:#2ecc71; font-weight:700;">' + passRate + '%</span></p>' +
-                '<table width="100%" cellpadding="0" cellspacing="0"><tr>' +
-                '<td bgcolor="#e8eaf0" style="background-color:#e8eaf0; border-radius:50px; height:10px;">' +
-                '<table cellpadding="0" cellspacing="0" width="' + passRate + '%"><tr>' +
-                '<td bgcolor="#2ecc71" style="background-color:#2ecc71; border-radius:50px; height:10px; font-size:0;">&nbsp;</td>' +
-                '</tr></table></td></tr></table>' +
-                '<p style="margin:28px 0 10px; font-size:13px; font-weight:600; color:#555; letter-spacing:0.5px; text-transform:uppercase; font-family:\'Segoe UI\', Arial, sans-serif;">Test Results Summary</p>' +
-                '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; border:1px solid #e8eaed;">' +
-                '<thead><tr bgcolor="#f7f8fa" style="background-color:#f7f8fa;">' +
-                '<th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:600; color:#888; text-transform:uppercase; border-bottom:1px solid #e8eaed;">Status</th>' +
-                '<th style="padding:12px 16px; text-align:center; font-size:12px; font-weight:600; color:#888; text-transform:uppercase; border-bottom:1px solid #e8eaed;">Count</th>' +
-                '<th style="padding:12px 16px; text-align:center; font-size:12px; font-weight:600; color:#888; text-transform:uppercase; border-bottom:1px solid #e8eaed;">Bar</th>' +
-                '</tr></thead><tbody>' +
-                '<tr bgcolor="#ffffff"><td style="padding:12px 16px; border-bottom:1px solid #f0f2f5;"><span style="display:inline-block; width:10px; height:10px; background:#2ecc71; border-radius:50%; margin-right:8px;"></span><b>Passed</b></td>' +
-                '<td style="padding:12px 16px; text-align:center; font-size:18px; font-weight:700; color:#2ecc71; border-bottom:1px solid #f0f2f5;">' + passed + '</td>' +
-                '<td style="padding:12px 16px; border-bottom:1px solid #f0f2f5;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td bgcolor="#eafaf1" style="background-color:#eafaf1; border-radius:4px; height:8px;"><table cellpadding="0" cellspacing="0" width="' + passRate + '%"><tr><td bgcolor="#2ecc71" style="background-color:#2ecc71; border-radius:4px; height:8px; font-size:0;">&nbsp;</td></tr></table></td></tr></table></td></tr>' +
-                '<tr bgcolor="#fafbfc"><td style="padding:12px 16px; border-bottom:1px solid #f0f2f5;"><span style="display:inline-block; width:10px; height:10px; background:#e74c3c; border-radius:50%; margin-right:8px;"></span><b>Failed</b></td>' +
-                '<td style="padding:12px 16px; text-align:center; font-size:18px; font-weight:700; color:#e74c3c; border-bottom:1px solid #f0f2f5;">' + failed + '</td>' +
-                '<td style="padding:12px 16px; border-bottom:1px solid #f0f2f5;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td bgcolor="#fdedec" style="background-color:#fdedec; border-radius:4px; height:8px;"><table cellpadding="0" cellspacing="0" width="' + failRate + '%"><tr><td bgcolor="#e74c3c" style="background-color:#e74c3c; border-radius:4px; height:8px; font-size:0;">&nbsp;</td></tr></table></td></tr></table></td></tr>' +
-                '<tr bgcolor="#ffffff"><td style="padding:12px 16px; border-bottom:1px solid #f0f2f5;"><span style="display:inline-block; width:10px; height:10px; background:#e67e22; border-radius:50%; margin-right:8px;"></span><b>Broken</b></td>' +
-                '<td style="padding:12px 16px; text-align:center; font-size:18px; font-weight:700; color:#e67e22; border-bottom:1px solid #f0f2f5;">' + broken + '</td>' +
-                '<td style="padding:12px 16px; border-bottom:1px solid #f0f2f5;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td bgcolor="#fef5e7" style="background-color:#fef5e7; border-radius:4px; height:8px;"><table cellpadding="0" cellspacing="0" width="' + brokenRate + '%"><tr><td bgcolor="#e67e22" style="background-color:#e67e22; border-radius:4px; height:8px; font-size:0;">&nbsp;</td></tr></table></td></tr></table></td></tr>' +
-                '<tr bgcolor="#fafbfc"><td style="padding:12px 16px; border-bottom:1px solid #f0f2f5;"><span style="display:inline-block; width:10px; height:10px; background:#95a5a6; border-radius:50%; margin-right:8px;"></span><b>Skipped</b></td>' +
-                '<td style="padding:12px 16px; text-align:center; font-size:18px; font-weight:700; color:#95a5a6; border-bottom:1px solid #f0f2f5;">' + skipped + '</td>' +
-                '<td style="padding:12px 16px; border-bottom:1px solid #f0f2f5;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td bgcolor="#f4f6f7" style="background-color:#f4f6f7; border-radius:4px; height:8px;"><table cellpadding="0" cellspacing="0" width="' + skipRate + '%"><tr><td bgcolor="#95a5a6" style="background-color:#95a5a6; border-radius:4px; height:8px; font-size:0;">&nbsp;</td></tr></table></td></tr></table></td></tr>' +
-                '<tr bgcolor="#16213e"><td style="padding:13px 16px;"><b style="color:#ffffff; font-size:14px;">Total</b></td>' +
-                '<td style="padding:13px 16px; text-align:center; font-size:20px; font-weight:800; color:#61dafb;">' + total + '</td>' +
-                '<td style="padding:13px 16px;"><span style="color:#aabbdd; font-size:12px;">Duration: ' + testDur + '</span></td></tr>' +
-                '</tbody></table>' +
-                '<p style="margin:28px 0 10px; font-size:13px; font-weight:600; color:#555; letter-spacing:0.5px; text-transform:uppercase;">Build Information</p>' +
-                '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; border:1px solid #e8eaed;">' +
-                '<tr bgcolor="#f7f8fa"><td style="padding:10px 16px; font-size:13px; font-weight:600; color:#666; border-bottom:1px solid #e8eaed; width:40%;">Build Number</td><td style="padding:10px 16px; font-size:13px; color:#333; border-bottom:1px solid #e8eaed;">#' + env.BUILD_NUMBER + '</td></tr>' +
-                '<tr bgcolor="#ffffff"><td style="padding:10px 16px; font-size:13px; font-weight:600; color:#666; border-bottom:1px solid #e8eaed;">Branch</td><td style="padding:10px 16px; font-size:13px; color:#333; border-bottom:1px solid #e8eaed;">' + gitBranch + '</td></tr>' +
-                '<tr bgcolor="#f7f8fa"><td style="padding:10px 16px; font-size:13px; font-weight:600; color:#666; border-bottom:1px solid #e8eaed;">Commit</td><td style="padding:10px 16px; font-size:13px; color:#333; border-bottom:1px solid #e8eaed;">' + gitCommit + '</td></tr>' +
-                '<tr bgcolor="#ffffff"><td style="padding:10px 16px; font-size:13px; font-weight:600; color:#666; border-bottom:1px solid #e8eaed;">Duration</td><td style="padding:10px 16px; font-size:13px; color:#333; border-bottom:1px solid #e8eaed;">' + currentBuild.durationString + '</td></tr>' +
-                '<tr bgcolor="#f7f8fa"><td style="padding:10px 16px; font-size:13px; font-weight:600; color:#666; border-bottom:1px solid #e8eaed;">Triggered By</td><td style="padding:10px 16px; font-size:13px; color:#333; border-bottom:1px solid #e8eaed;">' + (env.BUILD_CAUSE ?: 'Scheduled / Manual') + '</td></tr>' +
-                '<tr bgcolor="#ffffff"><td style="padding:10px 16px; font-size:13px; font-weight:600; color:#666; border-bottom:1px solid #e8eaed;">Environment</td><td style="padding:10px 16px; font-size:13px; color:#333; border-bottom:1px solid #e8eaed;">Playwright – Chromium</td></tr>' +
-            
-                '</table></td></tr>' +
-                '<tr><td bgcolor="#f7f8fa" style="background-color:#f7f8fa; border-top:1px solid #e8eaed; padding:16px 40px; text-align:center;">' +
-                '<p style="margin:0; font-size:12px; color:#aaa;">Generated by Jenkins CI &bull; AUTOMATION PHASE 2 &bull; Build #' + env.BUILD_NUMBER + '</p>' +
-                '</td></tr></table></td></tr></table></body></html>'
+                // ── EMAIL ──────────────────────────────────────────────────────────────────
+                def emailBody = """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="supported-color-schemes" content="light dark"/>
+  <title>AUTOMATION PHASE 2 REPORT</title>
+  <style>
+    .card      { background-color: #ffffff !important; }
+    .header-td { background-color: #16213e !important; }
+    .footer-td { background-color: #f7f8fa !important; }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#f0f2f5;font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0f2f5;padding:32px 0;">
+<tr><td align="center">
+<table class="card" width="640" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.10);">
+
+  <!-- HEADER -->
+  <tr>
+    <td class="header-td" style="background-color:#16213e;padding:32px 40px;text-align:center;">
+      <p style="margin:0 0 6px 0;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#aabbdd;">Regression Test Suite</p>
+      <h1 style="margin:0;font-size:28px;font-weight:700;color:#61dafb;">AUTOMATION PHASE 2 REPORT</h1>
+      <p style="margin:10px 0 0;font-size:14px;color:#aabbdd;">
+        Build <span style="color:#61dafb;font-weight:700;">#${env.BUILD_NUMBER}</span>
+        &nbsp;&bull;&nbsp;${gitBranch} @ ${gitCommit}
+      </p>
+    </td>
+  </tr>
+
+  <!-- STATUS BADGE -->
+  <tr>
+    <td style="background-color:#ffffff;padding:24px 40px 8px;text-align:center;">
+      <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
+        <td style="background-color:${statusBgColor};border-radius:50px;border:2px solid ${statusColor};padding:8px 28px;">
+          <span style="color:${statusColor};font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
+            ${statusIcon}&nbsp;&nbsp;${displayResult}
+          </span>
+        </td>
+      </tr></table>
+    </td>
+  </tr>
+
+  <!-- BODY -->
+  <tr>
+    <td style="background-color:#ffffff;padding:16px 40px 32px;">
+
+      <!-- REPORT BUTTON -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;">
+        <tr>
+          <td style="background-color:#1e8449;border-radius:10px;padding:20px;text-align:center;">
+            <p style="margin:0 0 12px 0;font-size:14px;font-weight:700;color:#ffffff;">Full Interactive Allure Report &mdash; Opens in Browser</p>
+            <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
+              <td style="background-color:#ffffff;border-radius:8px;">
+                <a href="${reportUrl}" style="display:inline-block;padding:12px 32px;color:#1e8449;font-size:14px;font-weight:700;text-decoration:none;">Click Here to View Report</a>
+              </td>
+            </tr></table>
+            <p style="margin:12px 0 0;font-size:11px;color:#d5f5e3;">${reportUrl}</p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- PASS RATE BAR -->
+      <p style="margin:20px 0 6px;font-size:13px;font-weight:600;color:#555;letter-spacing:0.5px;text-transform:uppercase;">
+        Pass Rate &nbsp;<span style="font-size:20px;color:#2ecc71;font-weight:700;">${passRate}%</span>
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="background-color:#e8eaf0;border-radius:50px;height:10px;">
+          <table cellpadding="0" cellspacing="0" width="${passRate}%"><tr>
+            <td style="background-color:#2ecc71;border-radius:50px;height:10px;font-size:0;">&nbsp;</td>
+          </tr></table>
+        </td>
+      </tr></table>
+
+      <!-- PIE CHART IMAGE -->
+      <p style="margin:28px 0 10px;font-size:13px;font-weight:600;color:#555;letter-spacing:0.5px;text-transform:uppercase;">Test Results Chart</p>
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td align="center" style="padding:8px 0;">
+          <img src="${chartUrl}"
+               alt="Test Results Pie Chart"
+               width="400"
+               style="display:block;border:1px solid #e8eaed;border-radius:8px;max-width:100%;" />
+        </td>
+      </tr></table>
+
+      <!-- STATS TABLE -->
+      <p style="margin:28px 0 10px;font-size:13px;font-weight:600;color:#555;letter-spacing:0.5px;text-transform:uppercase;">Test Results Summary</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #e8eaed;">
+        <thead>
+          <tr style="background-color:#f7f8fa;">
+            <th style="padding:12px 16px;text-align:left;font-size:12px;font-weight:600;color:#888;text-transform:uppercase;border-bottom:1px solid #e8eaed;">Status</th>
+            <th style="padding:12px 16px;text-align:center;font-size:12px;font-weight:600;color:#888;text-transform:uppercase;border-bottom:1px solid #e8eaed;">Count</th>
+            <th style="padding:12px 16px;text-align:center;font-size:12px;font-weight:600;color:#888;text-transform:uppercase;border-bottom:1px solid #e8eaed;">%</th>
+            <th style="padding:12px 16px;text-align:left;font-size:12px;font-weight:600;color:#888;text-transform:uppercase;border-bottom:1px solid #e8eaed;">Bar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background-color:#ffffff;">
+            <td style="padding:12px 16px;border-bottom:1px solid #f0f2f5;color:#333;"><span style="display:inline-block;width:10px;height:10px;background:#2ecc71;border-radius:50%;margin-right:8px;"></span><b>Passed</b></td>
+            <td style="padding:12px 16px;text-align:center;font-size:18px;font-weight:700;color:#2ecc71;border-bottom:1px solid #f0f2f5;">${passed}</td>
+            <td style="padding:12px 16px;text-align:center;font-size:13px;font-weight:600;color:#2ecc71;border-bottom:1px solid #f0f2f5;">${passRate}%</td>
+            <td style="padding:12px 16px;border-bottom:1px solid #f0f2f5;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="background-color:#eafaf1;border-radius:4px;height:8px;"><table cellpadding="0" cellspacing="0" width="${passRate}%"><tr><td style="background-color:#2ecc71;border-radius:4px;height:8px;font-size:0;">&nbsp;</td></tr></table></td></tr></table></td>
+          </tr>
+          <tr style="background-color:#fafbfc;">
+            <td style="padding:12px 16px;border-bottom:1px solid #f0f2f5;color:#333;"><span style="display:inline-block;width:10px;height:10px;background:#e74c3c;border-radius:50%;margin-right:8px;"></span><b>Failed</b></td>
+            <td style="padding:12px 16px;text-align:center;font-size:18px;font-weight:700;color:#e74c3c;border-bottom:1px solid #f0f2f5;">${failed}</td>
+            <td style="padding:12px 16px;text-align:center;font-size:13px;font-weight:600;color:#e74c3c;border-bottom:1px solid #f0f2f5;">${failRate}%</td>
+            <td style="padding:12px 16px;border-bottom:1px solid #f0f2f5;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="background-color:#fdedec;border-radius:4px;height:8px;"><table cellpadding="0" cellspacing="0" width="${failRate}%"><tr><td style="background-color:#e74c3c;border-radius:4px;height:8px;font-size:0;">&nbsp;</td></tr></table></td></tr></table></td>
+          </tr>
+          <tr style="background-color:#ffffff;">
+            <td style="padding:12px 16px;border-bottom:1px solid #f0f2f5;color:#333;"><span style="display:inline-block;width:10px;height:10px;background:#e67e22;border-radius:50%;margin-right:8px;"></span><b>Broken</b></td>
+            <td style="padding:12px 16px;text-align:center;font-size:18px;font-weight:700;color:#e67e22;border-bottom:1px solid #f0f2f5;">${broken}</td>
+            <td style="padding:12px 16px;text-align:center;font-size:13px;font-weight:600;color:#e67e22;border-bottom:1px solid #f0f2f5;">${brokenRate}%</td>
+            <td style="padding:12px 16px;border-bottom:1px solid #f0f2f5;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="background-color:#fef5e7;border-radius:4px;height:8px;"><table cellpadding="0" cellspacing="0" width="${brokenRate}%"><tr><td style="background-color:#e67e22;border-radius:4px;height:8px;font-size:0;">&nbsp;</td></tr></table></td></tr></table></td>
+          </tr>
+          <tr style="background-color:#fafbfc;">
+            <td style="padding:12px 16px;border-bottom:1px solid #f0f2f5;color:#333;"><span style="display:inline-block;width:10px;height:10px;background:#95a5a6;border-radius:50%;margin-right:8px;"></span><b>Skipped</b></td>
+            <td style="padding:12px 16px;text-align:center;font-size:18px;font-weight:700;color:#95a5a6;border-bottom:1px solid #f0f2f5;">${skipped}</td>
+            <td style="padding:12px 16px;text-align:center;font-size:13px;font-weight:600;color:#95a5a6;border-bottom:1px solid #f0f2f5;">${skipRate}%</td>
+            <td style="padding:12px 16px;border-bottom:1px solid #f0f2f5;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="background-color:#f4f6f7;border-radius:4px;height:8px;"><table cellpadding="0" cellspacing="0" width="${skipRate}%"><tr><td style="background-color:#95a5a6;border-radius:4px;height:8px;font-size:0;">&nbsp;</td></tr></table></td></tr></table></td>
+          </tr>
+          <tr style="background-color:#16213e;">
+            <td style="padding:13px 16px;"><b style="color:#ffffff;font-size:14px;">📋 Total</b></td>
+            <td style="padding:13px 16px;text-align:center;font-size:20px;font-weight:800;color:#61dafb;">${total}</td>
+            <td style="padding:13px 16px;text-align:center;color:#aabbdd;font-size:13px;">100%</td>
+            <td style="padding:13px 16px;"><span style="color:#aabbdd;font-size:12px;">⏱️ ${testDur}</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- BUILD INFO TABLE -->
+      <p style="margin:28px 0 10px;font-size:13px;font-weight:600;color:#555;letter-spacing:0.5px;text-transform:uppercase;">Build Information</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #e8eaed;">
+        <tr style="background-color:#f7f8fa;"><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#666;border-bottom:1px solid #e8eaed;width:40%;">Build Number</td><td style="padding:10px 16px;font-size:13px;color:#333;border-bottom:1px solid #e8eaed;">#${env.BUILD_NUMBER}</td></tr>
+        <tr style="background-color:#ffffff;"><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#666;border-bottom:1px solid #e8eaed;">Branch</td><td style="padding:10px 16px;font-size:13px;color:#333;border-bottom:1px solid #e8eaed;">${gitBranch}</td></tr>
+        <tr style="background-color:#f7f8fa;"><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#666;border-bottom:1px solid #e8eaed;">Commit</td><td style="padding:10px 16px;font-size:13px;color:#333;border-bottom:1px solid #e8eaed;">${gitCommit}</td></tr>
+        <tr style="background-color:#ffffff;"><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#666;border-bottom:1px solid #e8eaed;">Duration</td><td style="padding:10px 16px;font-size:13px;color:#333;border-bottom:1px solid #e8eaed;">${currentBuild.durationString}</td></tr>
+        <tr style="background-color:#f7f8fa;"><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#666;border-bottom:1px solid #e8eaed;">Test Duration</td><td style="padding:10px 16px;font-size:13px;color:#333;border-bottom:1px solid #e8eaed;">${testDur}</td></tr>
+        <tr style="background-color:#ffffff;"><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#666;border-bottom:1px solid #e8eaed;">Triggered By</td><td style="padding:10px 16px;font-size:13px;color:#333;border-bottom:1px solid #e8eaed;">${env.BUILD_CAUSE ?: 'Scheduled / Manual'}</td></tr>
+        <tr style="background-color:#f7f8fa;"><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#666;border-bottom:1px solid #e8eaed;">Environment</td><td style="padding:10px 16px;font-size:13px;color:#333;border-bottom:1px solid #e8eaed;">Playwright – Chromium</td></tr>
+        <tr style="background-color:#ffffff;"><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#666;">Date and Time</td><td style="padding:10px 16px;font-size:13px;color:#333;">${buildDate}</td></tr>
+      </table>
+
+    </td>
+  </tr>
+
+  <!-- FOOTER -->
+  <tr>
+    <td class="footer-td" style="background-color:#f7f8fa;border-top:1px solid #e8eaed;padding:16px 40px;text-align:center;">
+      <p style="margin:0;font-size:12px;color:#888;">Generated by Jenkins CI &bull; AUTOMATION PHASE 2 &bull; Build #${env.BUILD_NUMBER}</p>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>"""
 
                 emailext(
                     subject: "${statusIcon} AUTOMATION PHASE 2 REPORT: ${displayResult} | Build #${env.BUILD_NUMBER} | Passed: ${passed}/${total}",
