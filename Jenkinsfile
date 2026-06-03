@@ -281,6 +281,7 @@ pipeline {
                 def chartCenterPrimary = hasResults ? "${passRate}%" : "NO"
                 def chartCenterSecondary = hasResults ? "PASS" : "RESULTS"
                 def chartCenterColor = passRate >= 80 ? "#2e7d32" : passRate >= 50 ? "#d68910" : "#c0392b"
+                def chartLegendDisplay = totalInt > 0 && (failedInt > 0 || brokenInt > 0 || skippedInt > 0)
 
                 def chartData = hasResults
                     ? [
@@ -296,9 +297,9 @@ pipeline {
                             ]]
                         ],
                         options: [
-                            cutoutPercentage: 74,
+                            cutoutPercentage: 78,
                             layout: [
-                                padding: [top: 8, right: 8, bottom: 8, left: 8]
+                                padding: [top: 2, right: 2, bottom: 2, left: 2]
                             ],
                             plugins: [
                                 datalabels: [display: false],
@@ -307,22 +308,23 @@ pipeline {
                                         [
                                             text: chartCenterPrimary,
                                             color: chartCenterColor,
-                                            font: [size: 34, weight: "bold"]
+                                            font: [size: 44, weight: "bold"]
                                         ],
                                         [
                                             text: chartCenterSecondary,
                                             color: "#2f3640",
-                                            font: [size: 16, weight: "bold"]
+                                            font: [size: 18, weight: "bold"]
                                         ]
                                     ]
                                 ],
                                 legend: [
+                                    display: chartLegendDisplay,
                                     position: "bottom",
                                     labels: [
                                         color: "#444444",
-                                    font: [size: 13, weight: "600"],
-                                    padding: 14,
-                                    boxWidth: 14,
+                                    font: [size: 12, weight: "600"],
+                                    padding: 10,
+                                    boxWidth: 12,
                                         usePointStyle: true,
                                         pointStyle: "circle"
                                     ]
@@ -342,9 +344,9 @@ pipeline {
                             ]]
                         ],
                         options: [
-                            cutoutPercentage: 74,
+                            cutoutPercentage: 78,
                             layout: [
-                                padding: [top: 8, right: 8, bottom: 8, left: 8]
+                                padding: [top: 2, right: 2, bottom: 2, left: 2]
                             ],
                             plugins: [
                                 datalabels: [display: false],
@@ -353,16 +355,17 @@ pipeline {
                                         [
                                             text: chartCenterPrimary,
                                             color: "#7f8c8d",
-                                            font: [size: 28, weight: "bold"]
+                                            font: [size: 38, weight: "bold"]
                                         ],
                                         [
                                             text: chartCenterSecondary,
                                             color: "#636e72",
-                                            font: [size: 15, weight: "bold"]
+                                            font: [size: 17, weight: "bold"]
                                         ]
                                     ]
                                 ],
                                 legend: [
+                                    display: false,
                                     position: "bottom",
                                     labels: [
                                         color: "#666666",
@@ -378,7 +381,7 @@ pipeline {
                     ]
 
                 def chartJson = JsonOutput.toJson(chartData)
-                def chartUrl  = "https://quickchart.io/chart?backgroundColor=white&width=400&height=320&c=" +
+                    def chartUrl  = "https://quickchart.io/chart?backgroundColor=white&width=520&height=380&devicePixelRatio=2&c=" +
                                 java.net.URLEncoder.encode(chartJson, 'UTF-8')
 
                 echo "Chart URL (verify in browser): ${chartUrl}"
@@ -687,14 +690,14 @@ pipeline {
         <tr>
           <td class="chart-td" align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:12px;border:1px solid #e8eaed;border-radius:8px;">
             <!--[if mso]>
-            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:400px;height:320px;">
+            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:520px;height:380px;">
               <v:fill type="solid" color="#ffffff"/>
               <v:textbox inset="0,0,0,0">
             <![endif]-->
             <img src="${chartUrl}"
                  alt="Test Results: Passed ${passed} (${passRate}%) | Failed ${failed} (${failRate}%) | Broken ${broken} (${brokenRate}%) | Skipped ${skipped} (${skipRate}%) | Total ${total}"
-                 width="400"
-                 height="320"
+                 width="520"
+                 height="380"
                  style="display:block;max-width:100%;border:0;outline:none;text-decoration:none;background-color:#ffffff;"
                  bgcolor="#ffffff" />
             <!--[if mso]>
