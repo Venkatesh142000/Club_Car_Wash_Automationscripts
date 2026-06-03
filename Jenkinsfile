@@ -14,7 +14,7 @@ pipeline {
         GITHUB_REPO        = 'AutomationReport'
         MAX_BUILDS_TO_KEEP = '4'
         ONEDRIVE_FOLDER    = '/Users/kalaltejavardhangoud/Library/CloudStorage/OneDrive-CDW/uiAutomationReport'
-        PLAYWRIGHT_SCRIPT  = 'test:sauce'
+        PLAYWRIGHT_SCRIPT  = 'test:jenkins'
         SAUCE_REGION       = 'eu-central-1'
         SAUCE_CREDENTIALS_ID = 'saucelabcred'
         TEAMS_WEBHOOK_URL  = credentials('teams-webhook-id')
@@ -278,6 +278,10 @@ pipeline {
 
                 // ── DOUGHNUT CHART URL ─────────────────────────────────────────────────────
                 def hasResults = totalInt > 0
+                def chartCenterPrimary = hasResults ? "${passRate}%" : "NO"
+                def chartCenterSecondary = hasResults ? "PASS" : "RESULTS"
+                def chartCenterColor = passRate >= 80 ? "#2e7d32" : passRate >= 50 ? "#d68910" : "#c0392b"
+
                 def chartData = hasResults
                     ? [
                         type: "doughnut",
@@ -288,29 +292,40 @@ pipeline {
                                 backgroundColor: ["#2ecc71", "#e74c3c", "#f39c12", "#95a5a6"],
                                 borderColor: "#ffffff",
                                 borderWidth: 3,
-                                hoverOffset: 6
+                                hoverOffset: 4
                             ]]
                         ],
                         options: [
-                            cutoutPercentage: 60,
+                            cutoutPercentage: 74,
+                            layout: [
+                                padding: [top: 8, right: 8, bottom: 8, left: 8]
+                            ],
                             plugins: [
+                                datalabels: [display: false],
+                                doughnutlabel: [
+                                    labels: [
+                                        [
+                                            text: chartCenterPrimary,
+                                            color: chartCenterColor,
+                                            font: [size: 34, weight: "bold"]
+                                        ],
+                                        [
+                                            text: chartCenterSecondary,
+                                            color: "#2f3640",
+                                            font: [size: 16, weight: "bold"]
+                                        ]
+                                    ]
+                                ],
                                 legend: [
                                     position: "bottom",
                                     labels: [
                                         color: "#444444",
-                                        font: [size: 12, weight: "600"],
-                                        padding: 12,
-                                        boxWidth: 12,
+                                    font: [size: 13, weight: "600"],
+                                    padding: 14,
+                                    boxWidth: 14,
                                         usePointStyle: true,
                                         pointStyle: "circle"
                                     ]
-                                ],
-                                title: [
-                                    display: true,
-                                    text: "Total: ${total}  |  Passed: ${passed}  Failed: ${failed}  Broken: ${broken}  Skipped: ${skipped}",
-                                    color: "#555555",
-                                    font: [size: 11, weight: "normal"],
-                                    padding: [top: 6, bottom: 0]
                                 ]
                             ]
                         ]
@@ -327,32 +342,43 @@ pipeline {
                             ]]
                         ],
                         options: [
-                            cutoutPercentage: 68,
+                            cutoutPercentage: 74,
+                            layout: [
+                                padding: [top: 8, right: 8, bottom: 8, left: 8]
+                            ],
                             plugins: [
+                                datalabels: [display: false],
+                                doughnutlabel: [
+                                    labels: [
+                                        [
+                                            text: chartCenterPrimary,
+                                            color: "#7f8c8d",
+                                            font: [size: 28, weight: "bold"]
+                                        ],
+                                        [
+                                            text: chartCenterSecondary,
+                                            color: "#636e72",
+                                            font: [size: 15, weight: "bold"]
+                                        ]
+                                    ]
+                                ],
                                 legend: [
                                     position: "bottom",
                                     labels: [
                                         color: "#666666",
-                                        font: [size: 12, weight: "600"],
-                                        padding: 12,
-                                        boxWidth: 12,
+                                        font: [size: 13, weight: "600"],
+                                        padding: 14,
+                                        boxWidth: 14,
                                         usePointStyle: true,
                                         pointStyle: "circle"
                                     ]
-                                ],
-                                title: [
-                                    display: true,
-                                    text: "No test results were produced. Check Sauce region / execution logs.",
-                                    color: "#666666",
-                                    font: [size: 11, weight: "normal"],
-                                    padding: [top: 6, bottom: 0]
                                 ]
                             ]
                         ]
                     ]
 
                 def chartJson = JsonOutput.toJson(chartData)
-                def chartUrl  = "https://quickchart.io/chart?backgroundColor=white&width=360&height=240&c=" +
+                def chartUrl  = "https://quickchart.io/chart?backgroundColor=white&width=400&height=320&c=" +
                                 java.net.URLEncoder.encode(chartJson, 'UTF-8')
 
                 echo "Chart URL (verify in browser): ${chartUrl}"
@@ -661,14 +687,14 @@ pipeline {
         <tr>
           <td class="chart-td" align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:12px;border:1px solid #e8eaed;border-radius:8px;">
             <!--[if mso]>
-            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:360px;height:240px;">
+            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:400px;height:320px;">
               <v:fill type="solid" color="#ffffff"/>
               <v:textbox inset="0,0,0,0">
             <![endif]-->
             <img src="${chartUrl}"
                  alt="Test Results: Passed ${passed} (${passRate}%) | Failed ${failed} (${failRate}%) | Broken ${broken} (${brokenRate}%) | Skipped ${skipped} (${skipRate}%) | Total ${total}"
-                 width="360"
-                 height="240"
+                 width="400"
+                 height="320"
                  style="display:block;max-width:100%;border:0;outline:none;text-decoration:none;background-color:#ffffff;"
                  bgcolor="#ffffff" />
             <!--[if mso]>
