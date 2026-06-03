@@ -15,7 +15,7 @@ pipeline {
         MAX_BUILDS_TO_KEEP = '4'
         ONEDRIVE_FOLDER    = '/Users/kalaltejavardhangoud/Library/CloudStorage/OneDrive-CDW/uiAutomationReport'
         PLAYWRIGHT_SCRIPT  = 'test:sauce'
-        SAUCE_REGION       = 'us-west-1'
+        SAUCE_REGION       = 'eu-central-1'
         SAUCE_CREDENTIALS_ID = 'saucelabcred'
         TEAMS_WEBHOOK_URL  = credentials('teams-webhook-id')
         PATH               = "/opt/homebrew/bin:/usr/local/bin:/bin:/usr/bin:${env.PATH}"
@@ -277,42 +277,79 @@ pipeline {
                                   : '⚠️'
 
                 // ── DOUGHNUT CHART URL ─────────────────────────────────────────────────────
-                def chartData = [
-                    type: "doughnut",
-                    data: [
-                        labels: ["Passed", "Failed", "Broken", "Skipped"],
-                        datasets: [[
-                            data: [passedInt, failedInt, brokenInt, skippedInt],
-                            backgroundColor: ["#2ecc71", "#e74c3c", "#f39c12", "#95a5a6"],
-                            borderColor: "#ffffff",
-                            borderWidth: 3,
-                            hoverOffset: 6
-                        ]]
-                    ],
-                    options: [
-                        cutoutPercentage: 60,
-                        plugins: [
-                            legend: [
-                                position: "bottom",
-                                labels: [
-                                    color: "#444444",
-                                    font: [size: 12, weight: "600"],
-                                    padding: 12,
-                                    boxWidth: 12,
-                                    usePointStyle: true,
-                                    pointStyle: "circle"
+                def hasResults = totalInt > 0
+                def chartData = hasResults
+                    ? [
+                        type: "doughnut",
+                        data: [
+                            labels: ["Passed", "Failed", "Broken", "Skipped"],
+                            datasets: [[
+                                data: [passedInt, failedInt, brokenInt, skippedInt],
+                                backgroundColor: ["#2ecc71", "#e74c3c", "#f39c12", "#95a5a6"],
+                                borderColor: "#ffffff",
+                                borderWidth: 3,
+                                hoverOffset: 6
+                            ]]
+                        ],
+                        options: [
+                            cutoutPercentage: 60,
+                            plugins: [
+                                legend: [
+                                    position: "bottom",
+                                    labels: [
+                                        color: "#444444",
+                                        font: [size: 12, weight: "600"],
+                                        padding: 12,
+                                        boxWidth: 12,
+                                        usePointStyle: true,
+                                        pointStyle: "circle"
+                                    ]
+                                ],
+                                title: [
+                                    display: true,
+                                    text: "Total: ${total}  |  Passed: ${passed}  Failed: ${failed}  Broken: ${broken}  Skipped: ${skipped}",
+                                    color: "#555555",
+                                    font: [size: 11, weight: "normal"],
+                                    padding: [top: 6, bottom: 0]
                                 ]
-                            ],
-                            title: [
-                                display: true,
-                                text: "Total: ${total}  |  Passed: ${passed}  Failed: ${failed}  Broken: ${broken}  Skipped: ${skipped}",
-                                color: "#555555",
-                                font: [size: 11, weight: "normal"],
-                                padding: [top: 6, bottom: 0]
                             ]
                         ]
                     ]
-                ]
+                    : [
+                        type: "doughnut",
+                        data: [
+                            labels: ["No results generated"],
+                            datasets: [[
+                                data: [1],
+                                backgroundColor: ["#d5dbdb"],
+                                borderColor: "#ffffff",
+                                borderWidth: 3
+                            ]]
+                        ],
+                        options: [
+                            cutoutPercentage: 68,
+                            plugins: [
+                                legend: [
+                                    position: "bottom",
+                                    labels: [
+                                        color: "#666666",
+                                        font: [size: 12, weight: "600"],
+                                        padding: 12,
+                                        boxWidth: 12,
+                                        usePointStyle: true,
+                                        pointStyle: "circle"
+                                    ]
+                                ],
+                                title: [
+                                    display: true,
+                                    text: "No test results were produced. Check Sauce region / execution logs.",
+                                    color: "#666666",
+                                    font: [size: 11, weight: "normal"],
+                                    padding: [top: 6, bottom: 0]
+                                ]
+                            ]
+                        ]
+                    ]
 
                 def chartJson = JsonOutput.toJson(chartData)
                 def chartUrl  = "https://quickchart.io/chart?backgroundColor=white&width=360&height=240&c=" +
@@ -335,32 +372,37 @@ pipeline {
                                 body: [
                                     // ── HEADER ────────────────────────────────────────────
                                     [
-                                        type: "ColumnSet",
-                                        style: (isPartiallyPassed ? "warning" : currentBuild.result == 'SUCCESS' ? "good" : currentBuild.result == 'FAILURE' ? "attention" : "warning"),
+                                        type: "Container",
+                                        style: "emphasis",
                                         bleed: true,
-                                        columns: [
+                                        items: [
                                             [
-                                                type: "Column",
-                                                width: "stretch",
-                                                items: [
+                                                type: "ColumnSet",
+                                                columns: [
                                                     [
-                                                        type: "TextBlock",
-                                                        text: "🤖  AUTOMATION PHASE 2 REPORT",
-                                                        weight: "Bolder",
-                                                        size: "Large",
-                                                        color: "Default",
-                                                        horizontalAlignment: "Center",
-                                                        spacing: "Medium",
-                                                        wrap: true
-                                                    ],
-                                                    [
-                                                        type: "TextBlock",
-                                                        text: "Build #${env.BUILD_NUMBER}  •  ${buildDate}",
-                                                        size: "Small",
-                                                        color: "Default",
-                                                        isSubtle: true,
-                                                        horizontalAlignment: "Center",
-                                                        spacing: "None"
+                                                        type: "Column",
+                                                        width: "stretch",
+                                                        items: [
+                                                            [
+                                                                type: "TextBlock",
+                                                                text: "🤖  AUTOMATION PHASE 2 REPORT",
+                                                                weight: "Bolder",
+                                                                size: "Large",
+                                                                color: "Default",
+                                                                horizontalAlignment: "Center",
+                                                                spacing: "Medium",
+                                                                wrap: true
+                                                            ],
+                                                            [
+                                                                type: "TextBlock",
+                                                                text: "Build #${env.BUILD_NUMBER}  •  ${buildDate}",
+                                                                size: "Small",
+                                                                color: "Default",
+                                                                isSubtle: true,
+                                                                horizontalAlignment: "Center",
+                                                                spacing: "None"
+                                                            ]
+                                                        ]
                                                     ]
                                                 ]
                                             ]
@@ -614,7 +656,7 @@ pipeline {
       </tr></table>
 
       <!-- PIE CHART IMAGE -->
-      <p style="margin:28px 0 10px;font-size:13px;font-weight:600;color:#555555;letter-spacing:0.5px;text-transform:uppercase;">Test Results Chart</p>
+    <p style="margin:28px 0 10px;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;background-color:#16213e;padding:10px 14px;border-radius:8px;">Test Results Chart</p>
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
           <td class="chart-td" align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:12px;border:1px solid #e8eaed;border-radius:8px;">
@@ -638,7 +680,7 @@ pipeline {
       </table>
 
       <!-- STATS TABLE -->
-      <p style="margin:28px 0 10px;font-size:13px;font-weight:600;color:#555555;letter-spacing:0.5px;text-transform:uppercase;">Test Results Summary</p>
+    <p style="margin:28px 0 10px;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;background-color:#16213e;padding:10px 14px;border-radius:8px;">Test Results Summary</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #e8eaed;">
         <thead>
           <tr>
@@ -683,7 +725,7 @@ pipeline {
       </table>
 
       <!-- BUILD INFO TABLE -->
-      <p style="margin:28px 0 10px;font-size:13px;font-weight:600;color:#555555;letter-spacing:0.5px;text-transform:uppercase;">Build Information</p>
+    <p style="margin:28px 0 10px;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;background-color:#16213e;padding:10px 14px;border-radius:8px;">Build Information</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #e8eaed;">
         <tr><td bgcolor="#f7f8fa" style="background-color:#f7f8fa;padding:10px 16px;font-size:13px;font-weight:600;color:#666666;border-bottom:1px solid #e8eaed;width:40%;">Build Number</td><td bgcolor="#f7f8fa" style="background-color:#f7f8fa;padding:10px 16px;font-size:13px;color:#333333;border-bottom:1px solid #e8eaed;">#${env.BUILD_NUMBER}</td></tr>
         <tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:10px 16px;font-size:13px;font-weight:600;color:#666666;border-bottom:1px solid #e8eaed;">Branch</td><td bgcolor="#ffffff" style="background-color:#ffffff;padding:10px 16px;font-size:13px;color:#333333;border-bottom:1px solid #e8eaed;">${gitBranch}</td></tr>
