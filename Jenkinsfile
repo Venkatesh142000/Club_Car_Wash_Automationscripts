@@ -381,7 +381,7 @@ pipeline {
                     ]
 
                 def chartJson = JsonOutput.toJson(chartData)
-                    def chartUrl  = "https://quickchart.io/chart?backgroundColor=white&width=520&height=380&devicePixelRatio=2&c=" +
+                    def chartUrl  = "https://quickchart.io/chart?backgroundColor=white&width=540&height=396&devicePixelRatio=2&c=" +
                                 java.net.URLEncoder.encode(chartJson, 'UTF-8')
 
                 echo "Chart URL (verify in browser): ${chartUrl}"
@@ -471,13 +471,26 @@ pipeline {
                                         style: "default",
                                         items: [
                                             [
-                                                type: "Image",
-                                                url: "${chartUrl}",
-                                                altText: "Test Results: Passed ${passed} | Failed ${failed} | Broken ${broken} | Skipped ${skipped}",
-                                                size: "Stretch",
-                                                horizontalAlignment: "Center",
-                                                spacing: "Small",
-                                                style: "default"
+                                                type: "ColumnSet",
+                                                columns: [
+                                                    [type: "Column", width: 1, items: []],
+                                                    [
+                                                        type: "Column",
+                                                        width: 18,
+                                                        items: [
+                                                            [
+                                                                type: "Image",
+                                                                url: "${chartUrl}",
+                                                                altText: "Test Results: Passed ${passed} | Failed ${failed} | Broken ${broken} | Skipped ${skipped}",
+                                                                size: "Stretch",
+                                                                horizontalAlignment: "Center",
+                                                                spacing: "Small",
+                                                                style: "default"
+                                                            ]
+                                                        ]
+                                                    ],
+                                                    [type: "Column", width: 1, items: []]
+                                                ]
                                             ]
                                         ]
                                     ],
@@ -690,14 +703,14 @@ pipeline {
         <tr>
           <td class="chart-td" align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:12px;border:1px solid #e8eaed;border-radius:8px;">
             <!--[if mso]>
-            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:600px;height:440px;">
+            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:540px;height:396px;">
               <v:fill type="solid" color="#ffffff"/>
               <v:textbox inset="0,0,0,0">
             <![endif]-->
             <img src="${chartUrl}"
                  alt="Test Results: Passed ${passed} (${passRate}%) | Failed ${failed} (${failRate}%) | Broken ${broken} (${brokenRate}%) | Skipped ${skipped} (${skipRate}%) | Total ${total}"
-                 width="600"
-                 height="440"
+                 width="540"
+                 height="396"
                  style="display:block;max-width:100%;border:0;outline:none;text-decoration:none;background-color:#ffffff;"
                  bgcolor="#ffffff" />
             <!--[if mso]>
