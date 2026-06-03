@@ -645,66 +645,68 @@ pipeline {
     :root { color-scheme: light only; }
     body  { background-color: #f0f2f5 !important; }
     .card      { background-color: #ffffff !important; }
-        .header-td { background-color: #16213e !important; }
+        .header-td { background-color: #16213e !important; background-image: linear-gradient(#16213e, #16213e) !important; }
     .footer-td { background-color: #f7f8fa !important; }
     .chart-td  { background-color: #ffffff !important; }
-        .header-kicker { color: #aabbdd !important; }
-        .header-title { color: #61dafb !important; }
-        .header-meta { color: #aabbdd !important; }
-        .header-build { color: #61dafb !important; }
+        .header-kicker { color: #e8eef7 !important; }
+        .header-title { color: #ffffff !important; }
+        .header-meta { color: #e8eef7 !important; }
+        .header-build { color: #ffffff !important; }
         .status-shell { background-color: #ffffff !important; }
         .status-badge { background-color: ${statusBgColor} !important; border: 2px solid ${statusColor} !important; }
         .status-badge-text { color: ${statusColor} !important; }
-        .report-cta { background-color: #1e8449 !important; }
+        .report-cta { background-color: #1e8449 !important; background-image: linear-gradient(#1e8449, #1e8449) !important; }
         .report-cta-text { color: #ffffff !important; }
         .report-cta-link { color: #d5f5e3 !important; }
         .report-button { background-color: #ffffff !important; }
         .report-button-link { color: #1e8449 !important; }
-        .section-title { background-color: #16213e !important; color: #ffffff !important; }
-        .total-row-cell { background-color: #16213e !important; }
+        .section-title { background-color: #16213e !important; background-image: linear-gradient(#16213e, #16213e) !important; color: #ffffff !important; }
+        .total-row-cell { background-color: #16213e !important; background-image: linear-gradient(#16213e, #16213e) !important; }
         .total-row-text { color: #ffffff !important; }
         .total-row-accent { color: #61dafb !important; }
         .total-row-muted { color: #aabbdd !important; }
-    [data-ogsc] body,
-    [data-ogsb] body { background-color: #f0f2f5 !important; }
-    [data-ogsc] .card,
-    [data-ogsb] .card { background-color: #ffffff !important; }
-        [data-ogsc] .header-td,
-        [data-ogsb] .header-td { background-color: #16213e !important; }
-        [data-ogsc] .status-shell,
-        [data-ogsb] .status-shell { background-color: #ffffff !important; }
-        [data-ogsc] .status-badge,
-        [data-ogsb] .status-badge { background-color: ${statusBgColor} !important; border-color: ${statusColor} !important; }
-        [data-ogsc] .status-badge-text,
-        [data-ogsb] .status-badge-text { color: ${statusColor} !important; }
-        [data-ogsc] .report-cta,
-        [data-ogsb] .report-cta { background-color: #1e8449 !important; }
-        [data-ogsc] .report-button,
-        [data-ogsb] .report-button { background-color: #ffffff !important; }
-        [data-ogsc] .section-title,
-        [data-ogsb] .section-title { background-color: #16213e !important; color: #ffffff !important; }
-        [data-ogsc] .total-row-cell,
-        [data-ogsb] .total-row-cell { background-color: #16213e !important; }
-        [data-ogsc] .header-kicker,
-        [data-ogsb] .header-kicker { color: #aabbdd !important; }
-        [data-ogsc] .header-title,
-        [data-ogsb] .header-title { color: #61dafb !important; }
-        [data-ogsc] .header-meta,
-        [data-ogsb] .header-meta { color: #aabbdd !important; }
-        [data-ogsc] .header-build,
-        [data-ogsb] .header-build { color: #61dafb !important; }
-        [data-ogsc] .report-cta-text,
-        [data-ogsb] .report-cta-text,
-        [data-ogsc] .total-row-text,
-        [data-ogsb] .total-row-text { color: #ffffff !important; }
-        [data-ogsc] .report-cta-link,
-        [data-ogsb] .report-cta-link,
-        [data-ogsc] .total-row-muted,
-        [data-ogsb] .total-row-muted { color: #aabbdd !important; }
-        [data-ogsc] .report-button-link,
-        [data-ogsb] .report-button-link,
-        [data-ogsc] .total-row-accent,
-        [data-ogsb] .total-row-accent { color: #61dafb !important; }
+    @media (prefers-color-scheme: dark) {
+      [data-ogsc] body,
+      [data-ogsb] body { background-color: #f0f2f5 !important; }
+      [data-ogsc] .card,
+      [data-ogsb] .card { background-color: #ffffff !important; }
+      [data-ogsc] .header-td,
+      [data-ogsb] .header-td { background-color: ${bannerBgColor} !important; background-image: linear-gradient(${bannerBgColor}, ${bannerBgColor}) !important; }
+      [data-ogsc] .status-shell,
+      [data-ogsb] .status-shell { background-color: #ffffff !important; }
+      [data-ogsc] .status-badge,
+      [data-ogsb] .status-badge { background-color: ${statusBgColor} !important; border-color: ${statusColor} !important; }
+      [data-ogsc] .status-badge-text,
+      [data-ogsb] .status-badge-text { color: ${statusColor} !important; }
+      [data-ogsc] .report-cta,
+      [data-ogsb] .report-cta { background-color: #1e8449 !important; background-image: linear-gradient(#1e8449, #1e8449) !important; }
+      [data-ogsc] .report-button,
+      [data-ogsb] .report-button { background-color: #ffffff !important; }
+      [data-ogsc] .section-title,
+      [data-ogsb] .section-title { background-color: #16213e !important; background-image: linear-gradient(#16213e, #16213e) !important; color: #ffffff !important; }
+      [data-ogsc] .total-row-cell,
+      [data-ogsb] .total-row-cell { background-color: #16213e !important; background-image: linear-gradient(#16213e, #16213e) !important; }
+      [data-ogsc] .header-kicker,
+      [data-ogsb] .header-kicker { color: #e9f7ef !important; }
+      [data-ogsc] .header-title,
+      [data-ogsb] .header-title { color: #ffffff !important; }
+      [data-ogsc] .header-meta,
+      [data-ogsb] .header-meta { color: #f3f7f9 !important; }
+      [data-ogsc] .header-build,
+      [data-ogsb] .header-build { color: #ffffff !important; }
+      [data-ogsc] .report-cta-text,
+      [data-ogsb] .report-cta-text,
+      [data-ogsc] .total-row-text,
+      [data-ogsb] .total-row-text { color: #ffffff !important; }
+      [data-ogsc] .report-cta-link,
+      [data-ogsb] .report-cta-link,
+      [data-ogsc] .total-row-muted,
+      [data-ogsb] .total-row-muted { color: #aabbdd !important; }
+      [data-ogsc] .report-button-link,
+      [data-ogsb] .report-button-link,
+      [data-ogsc] .total-row-accent,
+      [data-ogsb] .total-row-accent { color: #61dafb !important; }
+    }
   </style>
 </head>
 <body style="margin:0;padding:0;background-color:#f0f2f5;font-family:'Segoe UI',Arial,sans-serif;">
@@ -714,11 +716,11 @@ pipeline {
 
   <!-- HEADER -->
   <tr>
-                <td class="header-td" bgcolor="#16213e" style="background-color:#16213e;padding:32px 40px;text-align:center;">
-                        <p class="header-kicker" style="margin:0 0 6px 0;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#aabbdd;">Regression Test Suite</p>
-                        <h1 class="header-title" style="margin:0;font-size:28px;font-weight:700;color:#61dafb;">AUTOMATION PHASE 2 REPORT</h1>
-                        <p class="header-meta" style="margin:10px 0 0;font-size:14px;color:#aabbdd;">
-                                Build <span class="header-build" style="color:#61dafb;font-weight:700;">#${env.BUILD_NUMBER}</span>
+                <td class="header-td" bgcolor="#16213e" style="background:#16213e;background-color:#16213e;background-image:linear-gradient(#16213e,#16213e);padding:32px 40px;text-align:center;">
+                        <p class="header-kicker" style="margin:0 0 6px 0;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#e8eef7;">Regression Test Suite</p>
+                        <h1 class="header-title" style="margin:0;font-size:28px;font-weight:700;color:#ffffff;">AUTOMATION PHASE 2 REPORT</h1>
+                        <p class="header-meta" style="margin:10px 0 0;font-size:14px;color:#e8eef7;">
+                                Build <span class="header-build" style="color:#ffffff;font-weight:700;">#${env.BUILD_NUMBER}</span>
         &nbsp;&bull;&nbsp;${gitBranch} @ ${gitCommit}
       </p>
     </td>
@@ -744,7 +746,7 @@ pipeline {
       <!-- REPORT BUTTON -->
       <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;">
         <tr>
-                    <td class="report-cta" bgcolor="#1e8449" style="background-color:#1e8449;border-radius:10px;padding:20px;text-align:center;">
+                      <td class="report-cta" bgcolor="#1e8449" style="background:#1e8449;background-color:#1e8449;background-image:linear-gradient(#1e8449,#1e8449);border-radius:10px;padding:20px;text-align:center;">
                         <p class="report-cta-text" style="margin:0 0 12px 0;font-size:14px;font-weight:700;color:#ffffff;">Full Interactive Allure Report &mdash; Opens in Browser</p>
             <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
                             <td class="report-button" bgcolor="#ffffff" style="background-color:#ffffff;border-radius:8px;">
@@ -769,7 +771,7 @@ pipeline {
       </tr></table>
 
       <!-- PIE CHART IMAGE -->
-    <p class="section-title" style="margin:28px 0 10px;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;background-color:#16213e;padding:10px 14px;border-radius:8px;">Test Results Chart</p>
+    <p class="section-title" style="margin:28px 0 10px;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;background:#16213e;background-color:#16213e;background-image:linear-gradient(#16213e,#16213e);padding:10px 14px;border-radius:8px;">Test Results Chart</p>
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
           <td class="chart-td" align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:12px;border:1px solid #e8eaed;border-radius:8px;">
@@ -793,7 +795,7 @@ pipeline {
       </table>
 
       <!-- STATS TABLE -->
-    <p class="section-title" style="margin:28px 0 10px;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;background-color:#16213e;padding:10px 14px;border-radius:8px;">Test Results Summary</p>
+    <p class="section-title" style="margin:28px 0 10px;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;background:#16213e;background-color:#16213e;background-image:linear-gradient(#16213e,#16213e);padding:10px 14px;border-radius:8px;">Test Results Summary</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #e8eaed;">
         <thead>
           <tr>
@@ -829,16 +831,16 @@ pipeline {
             <td bgcolor="#fafbfc" style="background-color:#fafbfc;padding:12px 16px;border-bottom:1px solid #f0f2f5;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td bgcolor="#f4f6f7" style="background-color:#f4f6f7;border-radius:4px;height:8px;"><table cellpadding="0" cellspacing="0" width="${skipRate}%"><tr><td bgcolor="#95a5a6" style="background-color:#95a5a6;border-radius:4px;height:8px;font-size:0;">&nbsp;</td></tr></table></td></tr></table></td>
           </tr>
           <tr>
-                        <td class="total-row-cell" bgcolor="#16213e" style="background-color:#16213e;padding:13px 16px;"><b class="total-row-text" style="color:#ffffff;font-size:14px;">📋 Total</b></td>
-                        <td class="total-row-cell" bgcolor="#16213e" style="background-color:#16213e;padding:13px 16px;text-align:center;font-size:20px;font-weight:800;color:#61dafb;"><span class="total-row-accent" style="color:#61dafb;">${total}</span></td>
-                        <td class="total-row-cell" bgcolor="#16213e" style="background-color:#16213e;padding:13px 16px;text-align:center;color:#aabbdd;font-size:13px;"><span class="total-row-muted" style="color:#aabbdd;">100%</span></td>
-                        <td class="total-row-cell" bgcolor="#16213e" style="background-color:#16213e;padding:13px 16px;"><span class="total-row-muted" style="color:#aabbdd;font-size:12px;">⏱️ ${testDur}</span></td>
+                        <td class="total-row-cell" bgcolor="#16213e" style="background:#16213e;background-color:#16213e;background-image:linear-gradient(#16213e,#16213e);padding:13px 16px;"><b class="total-row-text" style="color:#ffffff;font-size:14px;">📋 Total</b></td>
+                        <td class="total-row-cell" bgcolor="#16213e" style="background:#16213e;background-color:#16213e;background-image:linear-gradient(#16213e,#16213e);padding:13px 16px;text-align:center;font-size:20px;font-weight:800;color:#61dafb;"><span class="total-row-accent" style="color:#61dafb;">${total}</span></td>
+                        <td class="total-row-cell" bgcolor="#16213e" style="background:#16213e;background-color:#16213e;background-image:linear-gradient(#16213e,#16213e);padding:13px 16px;text-align:center;color:#aabbdd;font-size:13px;"><span class="total-row-muted" style="color:#aabbdd;">100%</span></td>
+                        <td class="total-row-cell" bgcolor="#16213e" style="background:#16213e;background-color:#16213e;background-image:linear-gradient(#16213e,#16213e);padding:13px 16px;"><span class="total-row-muted" style="color:#aabbdd;font-size:12px;">⏱️ ${testDur}</span></td>
           </tr>
         </tbody>
       </table>
 
       <!-- BUILD INFO TABLE -->
-        <p class="section-title" style="margin:28px 0 10px;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;background-color:#16213e;padding:10px 14px;border-radius:8px;">Build Information</p>
+        <p class="section-title" style="margin:28px 0 10px;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;background:#16213e;background-color:#16213e;background-image:linear-gradient(#16213e,#16213e);padding:10px 14px;border-radius:8px;">Build Information</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #e8eaed;">
         <tr><td bgcolor="#f7f8fa" style="background-color:#f7f8fa;padding:10px 16px;font-size:13px;font-weight:600;color:#666666;border-bottom:1px solid #e8eaed;width:40%;">Build Number</td><td bgcolor="#f7f8fa" style="background-color:#f7f8fa;padding:10px 16px;font-size:13px;color:#333333;border-bottom:1px solid #e8eaed;">#${env.BUILD_NUMBER}</td></tr>
         <tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:10px 16px;font-size:13px;font-weight:600;color:#666666;border-bottom:1px solid #e8eaed;">Branch</td><td bgcolor="#ffffff" style="background-color:#ffffff;padding:10px 16px;font-size:13px;color:#333333;border-bottom:1px solid #e8eaed;">${gitBranch}</td></tr>
@@ -869,7 +871,7 @@ pipeline {
                 emailext(
                     subject: "${statusIcon} AUTOMATION PHASE 2 REPORT: ${displayResult} | Build #${env.BUILD_NUMBER} | Passed: ${passed}/${total}",
                     mimeType: 'text/html',
-                    to: 'sugantha.mani@cdw.com,Vivekanandan.Raju@cdw.com,karthikeyan.jegadeesan@cdw.com,kishorkumar.dhanabose@cdw.com',
+                    to: 'sugantha.mani@cdw.com,Vivekanandan.Raju@cdw.com,karthikeyan.jegadeesan@cdw.com,kishorkumar.dhanabose@cdw.com,tejavardhangoud.kalal@cdw.com',
                     attachmentsPattern: 'allure-report.zip',
                     body: emailBody
                 )
