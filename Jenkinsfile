@@ -517,7 +517,7 @@ pipeline {
                                     // ── CHART SECTION ─────────────────────────────────────
                                     [
                                         type: "Container",
-                                        style: "emphasis",
+                                        style: "accent",
                                         bleed: true,
                                         spacing: "Medium",
                                         separator: true,
@@ -527,14 +527,14 @@ pipeline {
                                                 text: "📊  TEST RESULTS SUMMARY",
                                                 weight: "Bolder",
                                                 size: "Medium",
-                                                color: "Default",
+                                                color: "Accent",
                                                 wrap: true
                                             ]
                                         ]
                                     ],
                                     [
                                         type: "Container",
-                                        style: "default",
+                                        style: "accent",
                                         spacing: "Medium",
                                         items: [
                                             [
@@ -558,62 +558,63 @@ pipeline {
                                                     ],
                                                     [type: "Column", width: 2, items: []]
                                                 ]
+                                            ],
+                                            // ── STATS GRID ──────────────────────────────────────
+                                            [
+                                                type: "ColumnSet",
+                                                spacing: "Medium",
+                                                separator: true,
+                                                columns: [
+                                                    [
+                                                        type: "Column",
+                                                        width: "stretch",
+                                                        items: [
+                                                            [type: "TextBlock", text: "✅ Passed",  weight: "Bolder", color: "Good",      spacing: "Small"],
+                                                            [type: "TextBlock", text: "❌ Failed",  weight: "Bolder", color: "Attention", spacing: "Small"]
+                                                        ]
+                                                    ],
+                                                    [
+                                                        type: "Column",
+                                                        width: "auto",
+                                                        items: [
+                                                            [type: "TextBlock", text: "${passed} (${passRate}%)", weight: "Bolder", color: "Good",      horizontalAlignment: "Right", spacing: "Small"],
+                                                            [type: "TextBlock", text: "${failed} (${failRate}%)", weight: "Bolder", color: "Attention", horizontalAlignment: "Right", spacing: "Small"]
+                                                        ]
+                                                    ],
+                                                    [
+                                                        type: "Column",
+                                                        width: "stretch",
+                                                        items: [
+                                                            [type: "TextBlock", text: "💥 Broken",  weight: "Bolder", color: "Warning", spacing: "Small"],
+                                                            [type: "TextBlock", text: "⏭️ Skipped", weight: "Bolder", color: "Default", spacing: "Small"]
+                                                        ]
+                                                    ],
+                                                    [
+                                                        type: "Column",
+                                                        width: "auto",
+                                                        items: [
+                                                            [type: "TextBlock", text: "${broken} (${brokenRate}%)",  weight: "Bolder", color: "Warning", horizontalAlignment: "Right", spacing: "Small"],
+                                                            [type: "TextBlock", text: "${skipped} (${skipRate}%)",   weight: "Bolder", color: "Default", horizontalAlignment: "Right", spacing: "Small"]
+                                                        ]
+                                                    ]
+                                                ]
+                                            ],
+                                            [
+                                                type: "TextBlock",
+                                                text: "📋 Total: ${total} Tests  |  ⏱️ Duration: ${testDur}",
+                                                weight: "Bolder",
+                                                size: "Small",
+                                                color: "Default",
+                                                horizontalAlignment: "Center",
+                                                spacing: "Medium",
+                                                separator: true
                                             ]
                                         ]
-                                    ],
-                                    // ── STATS GRID ────────────────────────────────────────
-                                    [
-                                        type: "ColumnSet",
-                                        spacing: "Medium",
-                                        columns: [
-                                            [
-                                                type: "Column",
-                                                width: "stretch",
-                                                items: [
-                                                    [type: "TextBlock", text: "✅ Passed",  weight: "Bolder", color: "Good",      spacing: "Small"],
-                                                    [type: "TextBlock", text: "❌ Failed",  weight: "Bolder", color: "Attention", spacing: "Small"]
-                                                ]
-                                            ],
-                                            [
-                                                type: "Column",
-                                                width: "auto",
-                                                items: [
-                                                    [type: "TextBlock", text: "${passed} (${passRate}%)", weight: "Bolder", color: "Good",      horizontalAlignment: "Right", spacing: "Small"],
-                                                    [type: "TextBlock", text: "${failed} (${failRate}%)", weight: "Bolder", color: "Attention", horizontalAlignment: "Right", spacing: "Small"]
-                                                ]
-                                            ],
-                                            [
-                                                type: "Column",
-                                                width: "stretch",
-                                                items: [
-                                                    [type: "TextBlock", text: "💥 Broken",  weight: "Bolder", color: "Warning", spacing: "Small"],
-                                                    [type: "TextBlock", text: "⏭️ Skipped", weight: "Bolder", color: "Default", spacing: "Small"]
-                                                ]
-                                            ],
-                                            [
-                                                type: "Column",
-                                                width: "auto",
-                                                items: [
-                                                    [type: "TextBlock", text: "${broken} (${brokenRate}%)",  weight: "Bolder", color: "Warning", horizontalAlignment: "Right", spacing: "Small"],
-                                                    [type: "TextBlock", text: "${skipped} (${skipRate}%)",   weight: "Bolder", color: "Default", horizontalAlignment: "Right", spacing: "Small"]
-                                                ]
-                                            ]
-                                        ]
-                                    ],
-                                    [
-                                        type: "TextBlock",
-                                        text: "📋 Total: ${total} Tests  |  ⏱️ Duration: ${testDur}",
-                                        weight: "Bolder",
-                                        size: "Small",
-                                        color: "Default",
-                                        horizontalAlignment: "Center",
-                                        spacing: "Medium",
-                                        separator: true
                                     ],
                                     // ── BUILD INFO ────────────────────────────────────────
                                     [
                                         type: "Container",
-                                        style: "emphasis",
+                                        style: "accent",
                                         bleed: true,
                                         spacing: "Medium",
                                         separator: true,
@@ -623,29 +624,36 @@ pipeline {
                                                 text: "🔧  BUILD INFORMATION",
                                                 weight: "Bolder",
                                                 size: "Medium",
-                                                color: "Default",
+                                                color: "Accent",
                                                 wrap: true
                                             ]
                                         ]
                                     ],
                                     [
-                                        type: "FactSet",
-                                        facts: [
-                                            [title: "Build Number",  value: "#${env.BUILD_NUMBER}"],
-                                            [title: "Status",        value: "${displayResult}"],
-                                            [title: "Duration",      value: "${currentBuild.durationString}"],
-                                            [title: "Test Duration", value: "${testDur}"],
-                                            [title: "Branch",        value: "${gitBranch}"],
-                                            [title: "Commit",        value: "${gitCommit}"],
-                                            [title: "Environment",   value: "Playwright – Chromium"],
-                                            [title: "Triggered By",  value: "${env.BUILD_CAUSE ?: 'Scheduled / Manual'}"],
-                                            [title: "Date and Time", value: "${buildDate}"]
+                                        type: "Container",
+                                        style: "accent",
+                                        spacing: "Small",
+                                        items: [
+                                            [
+                                                type: "FactSet",
+                                                facts: [
+                                                    [title: "Build Number",  value: "#${env.BUILD_NUMBER}"],
+                                                    [title: "Status",        value: "${displayResult}"],
+                                                    [title: "Duration",      value: "${currentBuild.durationString}"],
+                                                    [title: "Test Duration", value: "${testDur}"],
+                                                    [title: "Branch",        value: "${gitBranch}"],
+                                                    [title: "Commit",        value: "${gitCommit}"],
+                                                    [title: "Environment",   value: "Playwright – Chromium"],
+                                                    [title: "Triggered By",  value: "${env.BUILD_CAUSE ?: 'Scheduled / Manual'}"],
+                                                    [title: "Date and Time", value: "${buildDate}"]
+                                                ]
+                                            ]
                                         ]
                                     ],
                                     // ── REPORT LINKS ──────────────────────────────────────
                                     [
                                         type: "Container",
-                                        style: "emphasis",
+                                        style: "accent",
                                         bleed: true,
                                         spacing: "Medium",
                                         separator: true,
@@ -655,16 +663,23 @@ pipeline {
                                                 text: "🔗  REPORT LINKS",
                                                 weight: "Bolder",
                                                 size: "Medium",
-                                                color: "Default",
+                                                color: "Accent",
                                                 wrap: true
                                             ]
                                         ]
                                     ],
                                     [
-                                        type: "FactSet",
-                                        facts: [
-                                            [title: "Allure Report (GitHub Pages)", value: "${githubPagesUrl}"],
-                                            [title: "Jenkins Build",                value: "${jenkinsUrl}"]
+                                        type: "Container",
+                                        style: "accent",
+                                        spacing: "Small",
+                                        items: [
+                                            [
+                                                type: "FactSet",
+                                                facts: [
+                                                    [title: "Allure Report (GitHub Pages)", value: "${githubPagesUrl}"],
+                                                    [title: "Jenkins Build",                value: "${jenkinsUrl}"]
+                                                ]
+                                            ]
                                         ]
                                     ]
                                 ],
