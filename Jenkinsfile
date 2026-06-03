@@ -419,8 +419,12 @@ pipeline {
                                     // ── HEADER ────────────────────────────────────────────
                                     [
                                         type: "Container",
-                                        style: teamsStatusStyle,
+                                        style: "default",
                                         bleed: true,
+                                        backgroundImage: [
+                                            url: "https://dummyimage.com/1200x2/16213e/16213e.png",
+                                            fillMode: "RepeatHorizontally"
+                                        ],
                                         items: [
                                             [
                                                 type: "ColumnSet",
@@ -431,22 +435,33 @@ pipeline {
                                                         items: [
                                                             [
                                                                 type: "TextBlock",
+                                                                text: "REGRESSION TEST SUITE",
+                                                                size: "Small",
+                                                                color: "Light",
+                                                                isSubtle: true,
+                                                                horizontalAlignment: "Center",
+                                                                spacing: "None",
+                                                                wrap: true
+                                                            ],
+                                                            [
+                                                                type: "TextBlock",
                                                                 text: "🤖  AUTOMATION PHASE 2 REPORT",
                                                                 weight: "Bolder",
                                                                 size: "Large",
                                                                 color: "Light",
                                                                 horizontalAlignment: "Center",
-                                                                spacing: "Medium",
+                                                                spacing: "Small",
                                                                 wrap: true
                                                             ],
                                                             [
                                                                 type: "TextBlock",
-                                                                text: "Build #${env.BUILD_NUMBER}  •  ${buildDate}",
+                                                                text: "Build #${env.BUILD_NUMBER}  •  ${gitBranch} @ ${gitCommit}  •  ${buildDate}",
                                                                 size: "Small",
                                                                 color: "Light",
                                                                 isSubtle: true,
                                                                 horizontalAlignment: "Center",
-                                                                spacing: "None"
+                                                                spacing: "None",
+                                                                wrap: true
                                                             ]
                                                         ]
                                                     ]
@@ -473,15 +488,72 @@ pipeline {
                                         horizontalAlignment: "Center",
                                         spacing: "None"
                                     ],
+                                    // ── REPORT CTA ───────────────────────────────────────
+                                    [
+                                        type: "Container",
+                                        style: "default",
+                                        bleed: true,
+                                        spacing: "Medium",
+                                        backgroundImage: [
+                                            url: "https://dummyimage.com/1200x2/1e8449/1e8449.png",
+                                            fillMode: "RepeatHorizontally"
+                                        ],
+                                        items: [
+                                            [
+                                                type: "TextBlock",
+                                                text: "Full Interactive Allure Report — Opens in Browser",
+                                                weight: "Bolder",
+                                                size: "Small",
+                                                color: "Light",
+                                                horizontalAlignment: "Center",
+                                                wrap: true
+                                            ],
+                                            [
+                                                type: "ActionSet",
+                                                horizontalAlignment: "Center",
+                                                spacing: "Small",
+                                                actions: [
+                                                    [
+                                                        type: "Action.OpenUrl",
+                                                        title: "Click Here to View Report",
+                                                        url: "${reportUrl}",
+                                                        style: "positive"
+                                                    ]
+                                                ]
+                                            ],
+                                            [
+                                                type: "TextBlock",
+                                                text: "${reportUrl}",
+                                                size: "Small",
+                                                color: "Light",
+                                                isSubtle: true,
+                                                horizontalAlignment: "Center",
+                                                spacing: "Small",
+                                                wrap: true
+                                            ]
+                                        ]
+                                    ],
                                     // ── CHART SECTION ─────────────────────────────────────
                                     [
-                                        type: "TextBlock",
-                                        text: "📊  TEST RESULTS SUMMARY",
-                                        weight: "Bolder",
-                                        size: "Medium",
-                                        color: "Default",
+                                        type: "Container",
+                                        style: "default",
+                                        bleed: true,
                                         spacing: "Medium",
-                                        separator: true
+                                        separator: true,
+                                        backgroundImage: [
+                                            url: "https://dummyimage.com/1200x2/16213e/16213e.png",
+                                            fillMode: "RepeatHorizontally"
+                                        ],
+                                        items: [
+                                            [
+                                                type: "TextBlock",
+                                                text: "📊  TEST RESULTS SUMMARY",
+                                                weight: "Bolder",
+                                                size: "Medium",
+                                                color: "Light",
+                                                wrap: true
+                                            ]
+                                        ]
                                     ],
                                     [
                                         type: "Container",
@@ -563,13 +635,25 @@ pipeline {
                                     ],
                                     // ── BUILD INFO ────────────────────────────────────────
                                     [
-                                        type: "TextBlock",
-                                        text: "🔧  BUILD INFORMATION",
-                                        weight: "Bolder",
-                                        size: "Medium",
-                                        color: "Default",
+                                        type: "Container",
+                                        style: "default",
+                                        bleed: true,
                                         spacing: "Medium",
-                                        separator: true
+                                        separator: true,
+                                        backgroundImage: [
+                                            url: "https://dummyimage.com/1200x2/16213e/16213e.png",
+                                            fillMode: "RepeatHorizontally"
+                                        ],
+                                        items: [
+                                            [
+                                                type: "TextBlock",
+                                                text: "🔧  BUILD INFORMATION",
+                                                weight: "Bolder",
+                                                size: "Medium",
+                                                color: "Light",
+                                                wrap: true
+                                            ]
+                                        ]
                                     ],
                                     [
                                         type: "FactSet",
@@ -587,13 +671,25 @@ pipeline {
                                     ],
                                     // ── REPORT LINKS ──────────────────────────────────────
                                     [
-                                        type: "TextBlock",
-                                        text: "🔗  REPORT LINKS",
-                                        weight: "Bolder",
-                                        size: "Medium",
-                                        color: "Default",
+                                        type: "Container",
+                                        style: "default",
+                                        bleed: true,
                                         spacing: "Medium",
-                                        separator: true
+                                        separator: true,
+                                        backgroundImage: [
+                                            url: "https://dummyimage.com/1200x2/16213e/16213e.png",
+                                            fillMode: "RepeatHorizontally"
+                                        ],
+                                        items: [
+                                            [
+                                                type: "TextBlock",
+                                                text: "🔗  REPORT LINKS",
+                                                weight: "Bolder",
+                                                size: "Medium",
+                                                color: "Light",
+                                                wrap: true
+                                            ]
+                                        ]
                                     ],
                                     [
                                         type: "FactSet",
