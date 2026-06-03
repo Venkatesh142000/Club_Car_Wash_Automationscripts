@@ -13,7 +13,10 @@ pipeline {
         GITHUB_USER        = 'tejavardhangoud'
         GITHUB_REPO        = 'AutomationReport'
         MAX_BUILDS_TO_KEEP = '4'
-        PLAYWRIGHT_SCRIPT  = 'test:jenkins'
+        ONEDRIVE_FOLDER    = '/Users/kalaltejavardhangoud/Library/CloudStorage/OneDrive-CDW/uiAutomationReport'
+        PLAYWRIGHT_SCRIPT  = 'test:sauce'
+        SAUCE_REGION       = 'us-west-1'
+        SAUCE_CREDENTIALS_ID = 'saucelabcred'
         TEAMS_WEBHOOK_URL  = credentials('teams-webhook-id')
         PATH               = "/opt/homebrew/bin:/usr/local/bin:/bin:/usr/bin:${env.PATH}"
     }
@@ -55,6 +58,9 @@ pipeline {
         }
 
         stage('Install Playwright Browsers') {
+            when {
+                expression { env.PLAYWRIGHT_SCRIPT != 'test:sauce' }
+            }
             steps {
                 sh '''
                     npx playwright install chromium
@@ -65,12 +71,36 @@ pipeline {
 
         stage('Run Playwright Tests') {
             steps {
-                sh '''
-                    echo "Running npm script: ${PLAYWRIGHT_SCRIPT}"
-                    echo "BASE_URL=${BASE_URL}"
-                    CI=true npm run ${PLAYWRIGHT_SCRIPT} || true
-                    echo "Playwright tests completed"
-                '''
+                script {
+                    if (env.PLAYWRIGHT_SCRIPT == 'test:sauce') {
+                        withCredentials([usernamePassword(credentialsId: env.SAUCE_CREDENTIALS_ID, usernameVariable: 'SAUCE_USERNAME', passwordVariable: 'SAUCE_ACCESS_KEY')]) {
+                            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                                sh '''
+                                    if [ -n "$SAUCE_USERNAME" ] && [ -n "$SAUCE_ACCESS_KEY" ]; then
+                                        echo "Sauce credentials loaded from Jenkins"
+                                    else
+                                        echo "Sauce credentials missing"
+                                        exit 1
+                                    fi
+                                    echo "Running npm script: ${PLAYWRIGHT_SCRIPT}"
+                                    echo "BASE_URL=${BASE_URL}"
+                                    echo "SAUCE_REGION=${SAUCE_REGION}"
+                                    CI=true npm run ${PLAYWRIGHT_SCRIPT}
+                                    echo "Sauce Labs execution completed"
+                                '''
+                            }
+                        }
+                    } else {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                echo "Running npm script: ${PLAYWRIGHT_SCRIPT}"
+                                echo "BASE_URL=${BASE_URL}"
+                                CI=true npm run ${PLAYWRIGHT_SCRIPT}
+                                echo "Playwright tests completed"
+                            '''
+                        }
+                    }
+                }
             }
         }
 
@@ -129,14 +159,32 @@ pipeline {
         stage('Save Allure Report to OneDrive') {
             steps {
                 script {
+                    if (!env.ONEDRIVE_FOLDER?.trim()) {
+                        error('ONEDRIVE_FOLDER is not configured. Set it in Jenkins environment variables before saving reports to OneDrive.')
+                    }
+
                     def timestamp  = new Date().format('yyyyMMdd_HHmmss')
                     def buildLabel = "Build_${env.BUILD_NUMBER}_${timestamp}"
-                    def destFolder = "${env.ONEDRIVE_FOLDER}/${buildLabel}"
+                    def baseFolder = env.ONEDRIVE_FOLDER.trim()
+                    def destFolder = "${baseFolder}/${buildLabel}"
                     env.ONEDRIVE_BUILD_FOLDER = destFolder
 
                     sh """
+                        mkdir -p "${baseFolder}"
                         mkdir -p "${destFolder}"
                         cp -r "${WORKSPACE}/allure-report/." "${destFolder}/"
+
+                        report_folders=\$(find "${baseFolder}" -mindepth 1 -maxdepth 1 -type d -name 'Build_*' | sort -r)
+                        old_folders=\$(printf '%s\n' "\$report_folders" | awk 'NR > 30')
+
+                        if [ -n "\$old_folders" ]; then
+                            printf '%s\n' "\$old_folders" | while IFS= read -r old_folder; do
+                                [ -n "\$old_folder" ] || continue
+                                rm -rf "\$old_folder"
+                                echo "Removed old OneDrive report: \$old_folder"
+                            done
+                        fi
+
                         echo "Report saved to OneDrive: ${destFolder}"
                     """
                 }
@@ -228,42 +276,46 @@ pipeline {
                                   : (currentBuild.result == 'FAILURE')     ? '❌'
                                   : '⚠️'
 
-                // ── PIE CHART URL ──────────────────────────────────────────────────────────
+                // ── DOUGHNUT CHART URL ─────────────────────────────────────────────────────
                 def chartData = [
-                    type: "pie",
+                    type: "doughnut",
                     data: [
                         labels: ["Passed", "Failed", "Broken", "Skipped"],
                         datasets: [[
                             data: [passedInt, failedInt, brokenInt, skippedInt],
                             backgroundColor: ["#2ecc71", "#e74c3c", "#f39c12", "#95a5a6"],
                             borderColor: "#ffffff",
-                            borderWidth: 3
+                            borderWidth: 3,
+                            hoverOffset: 6
                         ]]
                     ],
                     options: [
+                        cutoutPercentage: 60,
                         plugins: [
                             legend: [
                                 position: "bottom",
                                 labels: [
-                                    color: "#333333",
-                                    font: [size: 13, weight: "bold"],
-                                    padding: 16,
-                                    boxWidth: 16
+                                    color: "#444444",
+                                    font: [size: 12, weight: "600"],
+                                    padding: 12,
+                                    boxWidth: 12,
+                                    usePointStyle: true,
+                                    pointStyle: "circle"
                                 ]
                             ],
                             title: [
                                 display: true,
-                                text: "Passed:${passed}  Failed:${failed}  Broken:${broken}  Skipped:${skipped}",
-                                color: "#333333",
-                                font: [size: 12, weight: "normal"],
-                                padding: [top: 8, bottom: 0]
+                                text: "Total: ${total}  |  Passed: ${passed}  Failed: ${failed}  Broken: ${broken}  Skipped: ${skipped}",
+                                color: "#555555",
+                                font: [size: 11, weight: "normal"],
+                                padding: [top: 6, bottom: 0]
                             ]
                         ]
                     ]
                 ]
 
                 def chartJson = JsonOutput.toJson(chartData)
-                def chartUrl  = "https://quickchart.io/chart?backgroundColor=white&width=480&height=380&c=" +
+                def chartUrl  = "https://quickchart.io/chart?backgroundColor=white&width=360&height=240&c=" +
                                 java.net.URLEncoder.encode(chartJson, 'UTF-8')
 
                 echo "Chart URL (verify in browser): ${chartUrl}"
@@ -293,18 +345,20 @@ pipeline {
                                                 items: [
                                                     [
                                                         type: "TextBlock",
-                                                        text: "AUTOMATION PHASE 2 REPORT",
+                                                        text: "🤖  AUTOMATION PHASE 2 REPORT",
                                                         weight: "Bolder",
                                                         size: "Large",
-                                                        color: "Light",
+                                                        color: "Default",
                                                         horizontalAlignment: "Center",
-                                                        spacing: "Medium"
+                                                        spacing: "Medium",
+                                                        wrap: true
                                                     ],
                                                     [
                                                         type: "TextBlock",
-                                                        text: "Build #${env.BUILD_NUMBER}  |  ${buildDate}",
+                                                        text: "Build #${env.BUILD_NUMBER}  •  ${buildDate}",
                                                         size: "Small",
-                                                        color: "Light",
+                                                        color: "Default",
+                                                        isSubtle: true,
                                                         horizontalAlignment: "Center",
                                                         spacing: "None"
                                                     ]
@@ -331,29 +385,25 @@ pipeline {
                                         horizontalAlignment: "Center",
                                         spacing: "None"
                                     ],
-                                    // ── PIE CHART SECTION ─────────────────────────────────
+                                    // ── CHART SECTION ─────────────────────────────────────
                                     [
                                         type: "TextBlock",
-                                        text: "TEST RESULTS SUMMARY",
+                                        text: "📊  TEST RESULTS SUMMARY",
                                         weight: "Bolder",
                                         size: "Medium",
-                                        color: "Dark",
+                                        color: "Default",
                                         spacing: "Medium",
                                         separator: true
                                     ],
                                     [
                                         type: "Container",
                                         style: "default",
-                                        backgroundImage: [
-                                            url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI6QAAAABJRU5ErkJggg==",
-                                            fillMode: "cover"
-                                        ],
                                         items: [
                                             [
                                                 type: "Image",
                                                 url: "${chartUrl}",
-                                                altText: "Test Results Pie Chart — Passed:${passed} Failed:${failed} Broken:${broken} Skipped:${skipped}",
-                                                size: "Stretch",
+                                                altText: "Test Results: Passed ${passed} | Failed ${failed} | Broken ${broken} | Skipped ${skipped}",
+                                                size: "Large",
                                                 horizontalAlignment: "Center",
                                                 spacing: "Small",
                                                 style: "default"
@@ -386,7 +436,7 @@ pipeline {
                                                 width: "stretch",
                                                 items: [
                                                     [type: "TextBlock", text: "💥 Broken",  weight: "Bolder", color: "Warning", spacing: "Small"],
-                                                    [type: "TextBlock", text: "⏭️ Skipped", weight: "Bolder", color: "Dark",    spacing: "Small"]
+                                                    [type: "TextBlock", text: "⏭️ Skipped", weight: "Bolder", color: "Default", spacing: "Small"]
                                                 ]
                                             ],
                                             [
@@ -394,7 +444,7 @@ pipeline {
                                                 width: "auto",
                                                 items: [
                                                     [type: "TextBlock", text: "${broken} (${brokenRate}%)",  weight: "Bolder", color: "Warning", horizontalAlignment: "Right", spacing: "Small"],
-                                                    [type: "TextBlock", text: "${skipped} (${skipRate}%)",   weight: "Bolder", color: "Dark",    horizontalAlignment: "Right", spacing: "Small"]
+                                                    [type: "TextBlock", text: "${skipped} (${skipRate}%)",   weight: "Bolder", color: "Default", horizontalAlignment: "Right", spacing: "Small"]
                                                 ]
                                             ]
                                         ]
@@ -404,7 +454,7 @@ pipeline {
                                         text: "📋 Total: ${total} Tests  |  ⏱️ Duration: ${testDur}",
                                         weight: "Bolder",
                                         size: "Small",
-                                        color: "Dark",
+                                        color: "Default",
                                         horizontalAlignment: "Center",
                                         spacing: "Small",
                                         separator: true
@@ -412,10 +462,10 @@ pipeline {
                                     // ── BUILD INFO ────────────────────────────────────────
                                     [
                                         type: "TextBlock",
-                                        text: "BUILD INFORMATION",
+                                        text: "🔧  BUILD INFORMATION",
                                         weight: "Bolder",
                                         size: "Medium",
-                                        color: "Dark",
+                                        color: "Default",
                                         spacing: "Medium",
                                         separator: true
                                     ],
@@ -436,10 +486,10 @@ pipeline {
                                     // ── REPORT LINKS ──────────────────────────────────────
                                     [
                                         type: "TextBlock",
-                                        text: "REPORT LINKS",
+                                        text: "🔗  REPORT LINKS",
                                         weight: "Bolder",
                                         size: "Medium",
-                                        color: "Dark",
+                                        color: "Default",
                                         spacing: "Medium",
                                         separator: true
                                     ],
@@ -569,14 +619,14 @@ pipeline {
         <tr>
           <td class="chart-td" align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:12px;border:1px solid #e8eaed;border-radius:8px;">
             <!--[if mso]>
-            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:480px;height:380px;">
+            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:360px;height:240px;">
               <v:fill type="solid" color="#ffffff"/>
               <v:textbox inset="0,0,0,0">
             <![endif]-->
             <img src="${chartUrl}"
                  alt="Test Results: Passed ${passed} (${passRate}%) | Failed ${failed} (${failRate}%) | Broken ${broken} (${brokenRate}%) | Skipped ${skipped} (${skipRate}%) | Total ${total}"
-                 width="480"
-                 height="380"
+                 width="360"
+                 height="240"
                  style="display:block;max-width:100%;border:0;outline:none;text-decoration:none;background-color:#ffffff;"
                  bgcolor="#ffffff" />
             <!--[if mso]>
@@ -664,7 +714,7 @@ pipeline {
                 emailext(
                     subject: "${statusIcon} AUTOMATION PHASE 2 REPORT: ${displayResult} | Build #${env.BUILD_NUMBER} | Passed: ${passed}/${total}",
                     mimeType: 'text/html',
-                    to: 'sugantha.mani@cdw.com,Vivekanandan.Raju@cdw.com,karthikeyan.jegadeesan@cdw.com,kishorkumar.dhanabose@cdw.com,tejavardhangoud.kalal@cdw.com',
+                    to: '',
                     attachmentsPattern: 'allure-report.zip',
                     body: emailBody
                 )

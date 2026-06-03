@@ -4,9 +4,9 @@ import AddToCart from "../pages/addToCartPage.js";
 import CheckOut from "../pages/checkOutPage.js"
 import Products from "../pages/productsPage.js"
 import {generateCheckoutCustomer} from "../utils/fakerHelper.js";
-import {ApiBase} from '../Api/BaseLayer.js';
-import { ApiClient } from '../Api/clientLayer.js';
-import { PayloadBuilder } from '../utils/payLoadBuilder.js';
+import {ApiBase} from "../Api/BaseLayer.js";
+import { ApiClient } from "../Api/clientLayer.js";
+import { PayloadBuilder } from "../utils/payLoadBuilder.js";
 
 export const test = base.extend({
 	
