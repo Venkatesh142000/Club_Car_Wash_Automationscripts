@@ -381,7 +381,7 @@ pipeline {
                     ]
 
                 def chartJson = JsonOutput.toJson(chartData)
-                    def chartUrl  = "https://quickchart.io/chart?backgroundColor=white&width=540&height=396&devicePixelRatio=2&c=" +
+                    def chartUrl  = "https://quickchart.io/chart?backgroundColor=white&width=486&height=356&devicePixelRatio=2&c=" +
                                 java.net.URLEncoder.encode(chartJson, 'UTF-8')
 
                 echo "Chart URL (verify in browser): ${chartUrl}"
@@ -469,14 +469,15 @@ pipeline {
                                     [
                                         type: "Container",
                                         style: "default",
+                                        spacing: "Medium",
                                         items: [
                                             [
                                                 type: "ColumnSet",
                                                 columns: [
-                                                    [type: "Column", width: 1, items: []],
+                                                    [type: "Column", width: 2, items: []],
                                                     [
                                                         type: "Column",
-                                                        width: 18,
+                                                        width: 16,
                                                         items: [
                                                             [
                                                                 type: "Image",
@@ -489,7 +490,7 @@ pipeline {
                                                             ]
                                                         ]
                                                     ],
-                                                    [type: "Column", width: 1, items: []]
+                                                    [type: "Column", width: 2, items: []]
                                                 ]
                                             ]
                                         ]
@@ -497,7 +498,7 @@ pipeline {
                                     // ── STATS GRID ────────────────────────────────────────
                                     [
                                         type: "ColumnSet",
-                                        spacing: "Small",
+                                        spacing: "Medium",
                                         columns: [
                                             [
                                                 type: "Column",
@@ -540,7 +541,7 @@ pipeline {
                                         size: "Small",
                                         color: "Default",
                                         horizontalAlignment: "Center",
-                                        spacing: "Small",
+                                        spacing: "Medium",
                                         separator: true
                                     ],
                                     // ── BUILD INFO ────────────────────────────────────────
@@ -703,14 +704,14 @@ pipeline {
         <tr>
           <td class="chart-td" align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:12px;border:1px solid #e8eaed;border-radius:8px;">
             <!--[if mso]>
-            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:540px;height:396px;">
+            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:486px;height:356px;">
               <v:fill type="solid" color="#ffffff"/>
               <v:textbox inset="0,0,0,0">
             <![endif]-->
             <img src="${chartUrl}"
                  alt="Test Results: Passed ${passed} (${passRate}%) | Failed ${failed} (${failRate}%) | Broken ${broken} (${brokenRate}%) | Skipped ${skipped} (${skipRate}%) | Total ${total}"
-                 width="540"
-                 height="396"
+                 width="486"
+                 height="356"
                  style="display:block;max-width:100%;border:0;outline:none;text-decoration:none;background-color:#ffffff;"
                  bgcolor="#ffffff" />
             <!--[if mso]>
