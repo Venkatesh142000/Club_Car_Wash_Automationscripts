@@ -1,0 +1,73 @@
+apiVersion: v1alpha
+kind: playwright
+
+sauce:
+  region: eu-central-1
+  concurrency: 3
+  metadata:
+    tags:
+      - playwright
+      - e2e
+      - cloud
+
+defaults:
+  timeout: 20m
+
+env:
+  BASE_URL: https://www.saucedemo.com/
+  CI: "true"
+
+playwright:
+  version: package.json
+  configFile: playwright.config.js
+
+rootDir: ./
+nodeVersion: v20
+showConsoleLog: true
+
+reporters:
+  spotlight:
+    enabled: true
+  junit:
+    enabled: true
+    filename: sauce-results.xml
+
+artifacts:
+  cleanup: true
+  download:
+    when: always
+    match:
+      - console.log
+      - "*.json"
+      - "*.png"
+      - "*.webm"
+      - "*.zip"
+    directory: ./sauce-artifacts/
+
+suites:
+  - name: Chromium Windows 11
+    platformName: Windows 11
+    screenResolution: 1920x1080
+    testMatch:
+      - tests/login.spec.js
+    params:
+      browserName: chromium
+      project: chromium
+
+  - name: Firefox Windows 11
+    platformName: Windows 11
+    screenResolution: 1920x1080
+    testMatch:
+      - tests/login.spec.js
+    params:
+      browserName: firefox
+      project: firefox
+
+  - name: WebKit macOS 13
+    platformName: macOS 13
+    screenResolution: 1920x1080
+    testMatch:
+      - tests/login.spec.js
+    params:
+      browserName: webkit
+      project: webkit

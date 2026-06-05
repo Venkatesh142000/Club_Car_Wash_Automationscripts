@@ -946,6 +946,54 @@ export const allureBrowser = async (browserName) => {
 	await allure.parameter("Browser", browserName);
 };
 
+export const validateResponseBodyValue = async (expectedValue, actualValue) => {
+	const result = expectedValue === actualValue;
+
+	if (result) {
+		await allureStep(`Validating response body value pass->: Expected ${expectedValue} == Actual ${actualValue}`);
+	} else {
+		await allureStep(`Validating response body value fail->: Expected ${expectedValue} != Actual ${actualValue}`);
+	}
+
+	return result;
+};
+
+export const validateGetResponseStatusCode = async (getStatusCode) => {
+	const result = getStatusCode === 200;
+
+	if (result) {
+		await allureStep(`Validating GET response status code pass->: Expected 200 == Actual ${getStatusCode}`);
+	} else {
+		await allureStep(`Validating GET response status code fail->: Expected 200 != Actual ${getStatusCode}`);
+	}
+
+	return result;
+};
+
+export const validatePostResponseStatusCode = async (postStatusCode) => {
+	const result = postStatusCode === 200 || postStatusCode === 201;
+
+	if (result) {
+		await allureStep(`Validating POST response status code pass->: Expected 200 or 201 == Actual ${postStatusCode}`);
+	} else {
+		await allureStep(`Validating POST response status code fail->: Expected 200 or 201 != Actual ${postStatusCode}`);
+	}
+
+	return result;
+};
+
+export const validateDeleteResponseStatusCode = async (deleteStatusCode) => {
+	const result = deleteStatusCode === 200 || deleteStatusCode === 204;
+
+	if (result) {
+		await allureStep(`Validating DELETE response status code pass->: Expected 200 or 204 == Actual ${deleteStatusCode}`);
+	} else {
+		await allureStep(`Validating DELETE response status code fail->: Expected 200 or 204 != Actual ${deleteStatusCode}`);
+	}
+
+	return result;
+};
+
 
 
 
@@ -1024,6 +1072,10 @@ const helpers = {
 	allureScreenshot,
 	allureTag,
 	allureBrowser,
+	validateResponseBodyValue,
+	validateGetResponseStatusCode,
+	validatePostResponseStatusCode,
+	validateDeleteResponseStatusCode,
 };
 
 export default helpers;

@@ -9,6 +9,6 @@ node_modules/
 /allure-results/
 allure-report/
 .env
-testData.json
 package-lock.json
 results.xml
+.DS_Store
