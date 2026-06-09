@@ -33,10 +33,8 @@ test("Validate login functionality with invalid credentials @regression",async({
     await loginPage.goto();
     const invalidUsername = testData.users.invalid.invalidUsername;
     const invalidPassword = testData.users.invalid.invalidPassword;
-    await loginPage.login(invalidUsername,invalidPassword)
-
-
-
+    await loginPage.login(invalidUsername, invalidPassword);
+    await loginPage.validateerrorMessage();
 })
 
 })
