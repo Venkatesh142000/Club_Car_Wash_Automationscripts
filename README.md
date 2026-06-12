@@ -167,7 +167,10 @@ ENCRYPTED_USERNAME=
 ENCRYPTED_PASSWORD=
 
 # ─── API tests (Api/BaseLayer.js) ──────────────────────────
-TOKEN_VALUE=
+# Preferred (uppercase) env names shown; lowercase variants are also accepted.
+API_BASE_URL=
+API_USERNAME=
+API_PASSWORD=
 
 # ─── Jira Xray (updateTestResults.js) ──────────────────────
 XRAY_CLIENT_ID=
@@ -338,7 +341,7 @@ Categories:
 
 Two-level abstraction in `Api/`:
 
-- **`ApiBase`** ([Api/BaseLayer.js](Api/BaseLayer.js)) — creates a Playwright `APIRequestContext` with `BASE_URL` + `Bearer ${TOKEN_VALUE}` headers.
+- **`ApiBase`** ([Api/BaseLayer.js](Api/BaseLayer.js)) — creates a Playwright `APIRequestContext` using `api_BASE_URL` (or `API_BASE_URL` / `BASE_URL`) and configures Basic Auth using `api_username`/`api_password` (or `API_USERNAME`/`API_PASSWORD`). The context sets `Authorization: Basic <base64>`, `Content-Type: application/json`, and `Accept: application/json`.
 - **`ApiClient`** ([Api/clientLayer.js](Api/clientLayer.js)) — typed `get`/`post`/`put`/`delete` wrappers around the context.
 
 Use via the `apiClient` fixture:

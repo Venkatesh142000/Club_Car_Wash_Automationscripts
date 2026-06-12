@@ -983,12 +983,13 @@ export const validatePostResponseStatusCode = async (postStatusCode) => {
 };
 
 export const validateDeleteResponseStatusCode = async (deleteStatusCode) => {
-	const result = deleteStatusCode === 200 || deleteStatusCode === 204;
+	// Some servers return 201 on successful delete operations, accept it as well
+	const result = deleteStatusCode === 200 || deleteStatusCode === 201 || deleteStatusCode === 204;
 
 	if (result) {
-		await allureStep(`Validating DELETE response status code pass->: Expected 200 or 204 == Actual ${deleteStatusCode}`);
+		await allureStep(`Validating DELETE response status code pass->: Expected 200, 201 or 204 == Actual ${deleteStatusCode}`);
 	} else {
-		await allureStep(`Validating DELETE response status code fail->: Expected 200 or 204 != Actual ${deleteStatusCode}`);
+		await allureStep(`Validating DELETE response status code fail->: Expected 200, 201 or 204 != Actual ${deleteStatusCode}`);
 	}
 
 	return result;

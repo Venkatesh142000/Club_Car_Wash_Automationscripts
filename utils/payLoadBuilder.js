@@ -46,8 +46,11 @@ export class PayloadBuilder {
      * @param {object} [overrides={}] Optional field overrides.
      */
     buildBooking(overrides = {}) {
-        const checkin  = faker.date.soon({ days: 30 }).toISOString().split('T')[0];
-        const checkout = faker.date.soon({ days: 5, refDate: checkin }).toISOString().split('T')[0];
+        // Generate Date objects for checkin/checkout so refDate is valid
+        const checkinDate = faker.date.soon({ days: 30 });
+        const checkoutDate = faker.date.soon({ days: 5, refDate: checkinDate });
+        const checkin = checkinDate.toISOString().split('T')[0];
+        const checkout = checkoutDate.toISOString().split('T')[0];
 
         return {
             firstname:       faker.person.firstName(),

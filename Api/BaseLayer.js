@@ -6,9 +6,10 @@ dotenv.config();
 export class ApiBase {
   static async createAPIContext() {
 
-    const baseUrl = process.env.api_BASE_URL;
-    const username = process.env.api_username;
-    const password = process.env.api_password;
+    // Accept either lowercase or uppercase environment variable names to avoid confusion
+    const baseUrl = process.env.api_BASE_URL || process.env.API_BASE_URL || process.env.BASE_URL;
+    const username = process.env.api_username || process.env.API_USERNAME;
+    const password = process.env.api_password || process.env.API_PASSWORD;
 
     if (!baseUrl) {
       throw new Error(
@@ -18,7 +19,7 @@ export class ApiBase {
 
     if (!username || !password) {
       throw new Error(
-        "Environment variables API_USERNAME and API_PASSWORD are required for API context creation."
+        "Environment variables api_username (or API_USERNAME) and api_password (or API_PASSWORD) are required for API context creation."
       );
     }
 

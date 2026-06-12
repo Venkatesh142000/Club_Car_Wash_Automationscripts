@@ -122,11 +122,29 @@ test.describe("RESTful Booker API - E2E Test Flow (GET, POST, DELETE)", () => {
      
 
 
-        await helpers.allureStep(`Send DELETE /booking/${bookingId}`);
-        const deleteResponse = await apiClient.delete(`/booking/${bookingId}`);
+        // Create a booking first to delete (avoid relying on shared state)
+        const bookingPayload = payLoader.buildBooking();
+        await helpers.allureStep('Create a booking via POST for DELETE test');
+        const postResponse = await apiClient.post('/booking', bookingPayload);
+        const postStatus = postResponse.status();
+
+        const createdBooking = await postResponse.json();
+        const bookingToDeleteId = createdBooking.bookingid;
+        helpers.assertTruthy({ value: bookingToDeleteId });
+        await helpers.allureStep(`Booking created for delete with ID: ${bookingToDeleteId}`);
+
+        await helpers.allureStep(`Send DELETE /booking/${bookingToDeleteId}`);
+        const deleteResponse = await apiClient.delete(`/booking/${bookingToDeleteId}`);
         const deleteStatus = deleteResponse.status();
 
-        await helpers.validateDeleteResponseStatusCode(deleteStatus);
+        const responseText = await deleteResponse.text();
+        if (responseText) {
+            console.log('DELETE response body:', responseText);
+            await helpers.allureStep(`DELETE response body: ${responseText}`);
+        }
+
+        const isValidDeleteStatus = await helpers.validateDeleteResponseStatusCode(deleteStatus);
+        helpers.assertTruthy({ value: isValidDeleteStatus });
 
     });
 
@@ -135,19 +153,25 @@ test.describe("RESTful Booker API - E2E Test Flow (GET, POST, DELETE)", () => {
         await helpers.allureFeatureLabel("PUT Booking");
         await helpers.allureSeverity("normal");
 
-      
-       bookingPayLoad.firstname="Updated First Name";
+        // Create a booking to update (avoid relying on shared state)
+        const bookingPayload = payLoader.buildBooking();
+        await helpers.allureStep('Create a booking via POST for PATCH test');
+        const createRes = await apiClient.post('/booking', bookingPayload);
+        const createStatus = createRes.status();
+        const created = await createRes.json();
+        const bookingToUpdateId = created.bookingid;
+        helpers.assertTruthy({ value: bookingToUpdateId });
 
+        // Modify payload and send PATCH to the specific booking
+        bookingPayload.firstname = 'Updated First Name';
+        await helpers.allureStep(`Send PATCH /booking/${bookingToUpdateId}`);
+        const patchResponse = await apiClient.patch(`/booking/${bookingToUpdateId}`, bookingPayload);
+        const patchStatus = patchResponse.status();
 
+        const isValidPatchStatus = await helpers.validatePostResponseStatusCode(patchStatus);
+        helpers.assertTruthy({ value: isValidPatchStatus });
 
-
-
-        await helpers.allureStep("Create a booking via POST");
-        const postResponse = await apiClient.patch('/booking', bookingPayLoad);
-        const postStatus = postResponse.status();
-
-        
-        return bookingId;
+        return bookingToUpdateId;
     });
 
 });
