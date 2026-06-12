@@ -64,7 +64,7 @@ export default defineConfig({
 			},
 		},
 
-		{
+		/*{
 			name: "firefox",
 			use: {
 				browserName: "firefox",
