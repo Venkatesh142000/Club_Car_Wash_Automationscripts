@@ -57,17 +57,21 @@ pipeline {
             }
         }
 
-        stage('Install Playwright Browsers') {
-            when {
-                expression { env.PLAYWRIGHT_SCRIPT != 'test:sauce' }
-            }
-            steps {
-                sh '''
-                    npx playwright install chromium
-                    echo "Playwright Chromium browser installed"
-                '''
-            }
-        }
+     stage('Install Playwright Browsers') {
+      when {
+        expression { env.PLAYWRIGHT_SCRIPT != 'test:sauce' }
+       }
+     steps {
+        sh '''
+            if ls "$HOME/Library/Caches/ms-playwright"/chromium-* >/dev/null 2>&1; then
+                echo "Chromium already installed. Skipping installation."
+            else
+                echo "Installing Playwright Chromium..."
+                npx playwright install chromium
+            fi
+        '''
+    }
+}
 
         stage('Run Playwright Tests') {
             steps {
