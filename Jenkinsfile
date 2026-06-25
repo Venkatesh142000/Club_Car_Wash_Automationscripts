@@ -956,13 +956,23 @@ pipeline {
 </body>
 </html>"""
 
-                emailext(
-                    subject: "${statusIcon} AUTOMATION PHASE 2 REPORT: ${displayResult} | Build #${env.BUILD_NUMBER} | Passed: ${passed}/${total}",
-                    mimeType: 'text/html',
-                    to: 'sugantha.mani@cdw.com,Vivekanandan.Raju@cdw.com,karthikeyan.jegadeesan@cdw.com,kishorkumar.dhanabose@cdw.com,tejavardhangoud.kalal@cdw.com',
-                    attachmentsPattern: 'allure-report.zip',
-                    body: emailBody
-                )
+                def emailSent = false
+                try {
+                    emailext(
+                        subject: "${statusIcon} AUTOMATION PHASE 2 REPORT: ${displayResult} | Build #${env.BUILD_NUMBER} | Passed: ${passed}/${total}",
+                        mimeType: 'text/html',
+                        from: 'tejavardhangoud204@gmail.com',
+                        to: 'sugantha.mani@cdw.com,Vivekanandan.Raju@cdw.com,karthikeyan.jegadeesan@cdw.com,kishorkumar.dhanabose@cdw.com,tejavardhangoud.kalal@cdw.com',
+                        body: emailBody
+                    )
+                    emailSent = true
+                } catch (Exception emailErr) {
+                    echo "❌ Email notification FAILED: ${emailErr.message}"
+                    echo "   → Check Manage Jenkins > System > Extended E-mail Notification (SMTP server/port/auth)."
+                }
+                if (emailSent) {
+                    echo "✅ Email notification sent successfully."
+                }
             }
         }
 
