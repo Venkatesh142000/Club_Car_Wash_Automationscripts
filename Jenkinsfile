@@ -63,12 +63,9 @@ pipeline {
        }
      steps {
         sh '''
-            if find "$HOME/Library/Caches/ms-playwright" -name "chrome-headless-shell" -type f 2>/dev/null | grep -q .; then
-                echo "Chromium headless shell already installed. Skipping installation."
-            else
-                echo "Installing Playwright Chromium..."
-                npx playwright install chromium
-            fi
+            echo "Installing Playwright Chromium..."
+            npx playwright install chromium
+            echo "Playwright Chromium install complete."
         '''
     }
 }
