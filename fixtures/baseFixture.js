@@ -7,6 +7,7 @@ import {generateCheckoutCustomer} from "../utils/fakerHelper.js";
 import {ApiBase} from "../Api/BaseLayer.js";
 import { ApiClient } from "../Api/clientLayer.js";
 import { PayloadBuilder } from "../utils/payLoadBuilder.js";
+import { MySqlHelper } from "../db/mysqlHelper.js";
 
 export const test = base.extend({
 	
@@ -61,7 +62,14 @@ export const test = base.extend({
     await use(payLoader);
   },
 
-  
+  dbHelper: async ({}, use) => {
+    const dbHelper = new MySqlHelper();
+    try {
+      await use(dbHelper);
+    } finally {
+      await dbHelper.disconnect();
+    }
+  },
 
 	
 });

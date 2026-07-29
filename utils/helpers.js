@@ -690,7 +690,7 @@ export const assertContains = ({ actual, expectedPart }) => {
  * @param {unknown} params.value Value under test.
  */
 export const assertTruthy = ({ value }) => {
-	expect(value).toBeTruthy();
+	expect.soft(value).toBeTruthy();
 };
 
 /**
@@ -995,9 +995,389 @@ export const validateDeleteResponseStatusCode = async (deleteStatusCode) => {
 	return result;
 };
 
+export const getDbRowCount = async ({ dbHelper, tableName }) => {
+	const rows = await dbHelper.query(`SELECT COUNT(*) AS total FROM ${tableName}`);
+	return Number(rows[0]?.total ?? 0);
+};
 
+export const findNullValuesInRows = ({ rows, columns }) => {
+	const nullColumns = [];
+	rows.forEach((row, index) => {
+		columns.forEach((column) => {
+			if (row[column] === null || row[column] === undefined || row[column] === '') {
+				nullColumns.push({ rowIndex: index + 1, column });
+			}
+		});
+	});
+	return nullColumns;
+};
 
+export const getNonNullRows = ({ rows, columns }) => {
+	return rows.filter((row) => columns.every((column) => row[column] !== null && row[column] !== undefined && row[column] !== ''));
+};
 
+export const assertDbRowCount = async ({ dbHelper, tableName, expectedCount }) => {
+	const actualCount = await getDbRowCount({ dbHelper, tableName });
+	assertEqual({ actual: actualCount, expected: expectedCount });
+	return actualCount;
+};
+
+export const assertNoNullValues = ({ rows, columns }) => {
+	const nullValues = findNullValuesInRows({ rows, columns });
+	assertEqual({ actual: nullValues.length, expected: 0 });
+	return nullValues;
+};
+
+export const assertNonNullRows = ({ rows, columns }) => {
+	const filteredRows = getNonNullRows({ rows, columns });
+	assertGreaterThan({ actual: filteredRows.length, expected: 0 });
+	return filteredRows;
+};
+
+export const findDuplicateValues = ({ rows, column }) => {
+	const counts = new Map();
+	const duplicates = [];
+	rows.forEach((row, index) => {
+		const value = row[column];
+		if (!counts.has(value)) {
+			counts.set(value, []);
+		}
+		counts.get(value).push(index + 1);
+	});
+	counts.forEach((positions, value) => {
+		if (positions.length > 1) {
+			duplicates.push({ value, positions });
+		}
+	});
+	return duplicates;
+};
+
+export const assertUniqueColumnValues = ({ rows, column }) => {
+	const duplicates = findDuplicateValues({ rows, column });
+	assertEqual({ actual: duplicates.length, expected: 0 });
+	return duplicates;
+};
+
+export const validateEmailFormat = ({ email }) => {
+	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+export const assertEmailFormat = ({ rows, column }) => {
+	const invalidEmails = rows.filter((row) => !validateEmailFormat({ email: row[column] }));
+	assertEqual({ actual: invalidEmails.length, expected: 0 });
+	return invalidEmails;
+};
+
+export const validateForeignKeyIntegrity = async ({ dbHelper, tableName, column, referencedTable, referencedColumn }) => {
+	try {
+		// Get all non-null foreign key values using parameterized queries (SQL injection safe)
+		const rows = await dbHelper.query(
+			`SELECT ?? as fk_value FROM ?? WHERE ?? IS NOT NULL`,
+			[column, tableName, column]
+		);
+		
+		// Get all referenced values
+		const referencedRows = await dbHelper.query(
+			`SELECT ?? FROM ??`,
+			[referencedColumn, referencedTable]
+		);
+		
+		const referencedValues = new Set(referencedRows.map((item) => item[referencedColumn]));
+		
+		// Find orphaned foreign keys
+		const orphanedKeys = rows.filter((row) => !referencedValues.has(row.fk_value));
+		
+		if (orphanedKeys.length > 0) {
+			console.log(`Found ${orphanedKeys.length} orphaned foreign keys in ${tableName}.${column}:`, orphanedKeys);
+		}
+		
+		return orphanedKeys;
+	} catch (error) {
+		console.error('Foreign key validation failed:', error);
+		throw new Error(`FK validation failed: ${error.message}`);
+	}
+};
+
+export const assertOrderTotals = async ({ dbHelper }) => {
+	try {
+		const orders = await dbHelper.query(`
+			SELECT o.order_id, o.quantity, o.total_amount, o.product_id, p.price
+			FROM ?? o
+			JOIN ?? p ON o.product_id = p.product_id
+		`,
+		['orders', 'products']
+		);
+		
+		const mismatches = orders.filter((order) => {
+			if (!order.quantity || !order.price || !order.total_amount) {
+				return false; // Skip rows with null values
+			}
+			const expectedTotal = Number(order.quantity) * Number(order.price);
+			const actualTotal = Number(order.total_amount);
+			return Math.abs(actualTotal - expectedTotal) > 0.0001; // Allow small floating point errors
+		});
+		
+		if (mismatches.length > 0) {
+			console.log(`Found ${mismatches.length} order total mismatches:`, mismatches);
+		}
+		
+		return mismatches;
+	} catch (error) {
+		console.error('Order total validation failed:', error);
+		throw new Error(`Order validation failed: ${error.message}`);
+	}
+};
+
+/**
+ * COMMONLY REUSED HELPER FUNCTIONS (Cross-Project Use)
+ */
+
+/**
+ * Retry an async operation with exponential backoff.
+ * @param {object} params
+ * @param {() => Promise<any>} params.operation Async function to retry.
+ * @param {number} [params.maxRetries=3] Maximum retry attempts.
+ * @param {number} [params.delayMs=1000] Initial delay in milliseconds.
+ * @param {number} [params.backoffMultiplier=2] Exponential backoff multiplier.
+ * @param {(error: Error) => boolean} [params.shouldRetry] Custom retry condition.
+ */
+export const retryWithBackoff = async ({
+	operation,
+	maxRetries = 3,
+	delayMs = 1000,
+	backoffMultiplier = 2,
+	shouldRetry = () => true,
+}) => {
+	let lastError;
+	for (let attempt = 0; attempt <= maxRetries; attempt++) {
+		try {
+			return await operation();
+		} catch (error) {
+			lastError = error;
+			if (attempt === maxRetries || !shouldRetry(error)) {
+				throw error;
+			}
+			const waitTime = delayMs * Math.pow(backoffMultiplier, attempt);
+			console.log(`Retry attempt ${attempt + 1}/${maxRetries} after ${waitTime}ms - ${error.message}`);
+			await sleep({ ms: waitTime });
+		}
+	}
+	throw lastError;
+};
+
+/**
+ * Execute database query with retry logic and error handling.
+ * @param {object} params
+ * @param {object} params.dbHelper Database helper instance.
+ * @param {string} params.query SQL query or operation.
+ * @param {Array} [params.params=[]] Query parameters.
+ * @param {boolean} [params.withRetry=true] Enable automatic retry.
+ */
+export const queryDbWithRetry = async ({
+	dbHelper,
+	query,
+	params = [],
+	withRetry = true,
+}) => {
+	if (!withRetry) {
+		return await dbHelper.query(query, params);
+	}
+
+	return retryWithBackoff({
+		operation: () => dbHelper.query(query, params),
+		maxRetries: 3,
+		delayMs: 500,
+		shouldRetry: (error) => {
+			// Retry on connection errors, not on data errors
+			return error.code && ['PROTOCOL_CONNECTION_LOST', 'ECONNREFUSED', 'ETIMEDOUT'].includes(error.code);
+		},
+	});
+};
+
+/**
+ * Clean up test data from database with transaction support.
+ * @param {object} params
+ * @param {object} params.dbHelper Database helper instance.
+ * @param {string} params.tableName Table to clean.
+ * @param {string} [params.whereClause] WHERE clause for selective deletion.
+ * @param {Array} [params.params=[]] Query parameters.
+ */
+export const cleanupDbData = async ({
+	dbHelper,
+	tableName,
+	whereClause,
+	params = [],
+}) => {
+	try {
+		const sql = whereClause
+			? `DELETE FROM ?? WHERE ${whereClause}`
+			: `DELETE FROM ??`;
+		const queryParams = whereClause ? [tableName, ...params] : [tableName];
+		const result = await dbHelper.query(sql, queryParams);
+		console.log(`Cleaned up ${tableName}: ${whereClause || 'all rows'}`);
+		return result;
+	} catch (error) {
+		console.error(`Cleanup failed for ${tableName}:`, error);
+		throw new Error(`Cleanup failed: ${error.message}`);
+	}
+};
+
+/**
+ * Insert test data into database.
+ * @param {object} params
+ * @param {object} params.dbHelper Database helper instance.
+ * @param {string} params.tableName Table name.
+ * @param {object|Array} params.data Data to insert (single object or array).
+ */
+export const insertTestData = async ({
+	dbHelper,
+	tableName,
+	data,
+}) => {
+	try {
+		const isArray = Array.isArray(data);
+		const records = isArray ? data : [data];
+		
+		for (const record of records) {
+			const columns = Object.keys(record);
+			const values = Object.values(record);
+			const placeholders = columns.map(() => '?').join(',');
+			const columnList = columns.map(() => '??').join(',');
+			
+			const sql = `INSERT INTO ?? (${columnList}) VALUES (${placeholders})`;
+			const params = [tableName, ...columns, ...values];
+			
+			await dbHelper.query(sql, params);
+		}
+		
+		console.log(`Inserted ${records.length} record(s) into ${tableName}`);
+		return records;
+	} catch (error) {
+		console.error(`Insert failed for ${tableName}:`, error);
+		throw new Error(`Insert failed: ${error.message}`);
+	}
+};
+
+/**
+ * Validate phone number format (basic international format).
+ */
+export const validatePhoneFormat = ({ phone }) => {
+	const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
+	return phoneRegex.test(phone?.trim());
+};
+
+/**
+ * Validate URL format.
+ */
+export const validateUrlFormat = ({ url }) => {
+	try {
+		new URL(url);
+		return true;
+	} catch {
+		return false;
+	}
+};
+
+/**
+ * Validate date format (YYYY-MM-DD).
+ */
+export const validateDateFormat = ({ date, format = 'YYYY-MM-DD' }) => {
+	if (format === 'YYYY-MM-DD') {
+		return /^\d{4}-\d{2}-\d{2}$/.test(date) && !isNaN(Date.parse(date));
+	}
+	return false;
+};
+
+/**
+ * Deep compare two objects for equality.
+ */
+export const deepEqual = ({ actual, expected }) => {
+	return JSON.stringify(actual) === JSON.stringify(expected);
+};
+
+/**
+ * Assert objects are deeply equal.
+ */
+export const assertDeepEqual = ({ actual, expected }) => {
+	if (!deepEqual({ actual, expected })) {
+		console.log('Expected:', expected);
+		console.log('Actual:', actual);
+		throw new Error('Objects are not deeply equal');
+	}
+};
+
+/**
+ * Filter object array by multiple conditions.
+ * @param {object} params
+ * @param {Array} params.data Array of objects to filter.
+ * @param {object} params.conditions Key-value pairs to match.
+ */
+export const filterDataByConditions = ({ data, conditions }) => {
+	return data.filter((item) =>
+		Object.entries(conditions).every(([key, value]) => item[key] === value)
+	);
+};
+
+/**
+ * Group array of objects by a specific key.
+ */
+export const groupDataByKey = ({ data, key }) => {
+	return data.reduce((acc, item) => {
+		const groupKey = item[key];
+		if (!acc[groupKey]) {
+			acc[groupKey] = [];
+		}
+		acc[groupKey].push(item);
+		return acc;
+	}, {});
+};
+
+/**
+ * Extract specific fields from array of objects.
+ */
+export const extractFields = ({ data, fields }) => {
+	return data.map((item) =>
+		fields.reduce((acc, field) => {
+			acc[field] = item[field];
+			return acc;
+		}, {})
+	);
+};
+
+/**
+ * Log test step with timestamp and status.
+ */
+export const logTestStep = ({
+	step,
+	status = 'INFO',
+	data = null,
+}) => {
+	const timestamp = new Date().toISOString();
+	const message = `[${timestamp}] [${status}] ${step}`;
+	console.log(message);
+	if (data) {
+		console.log('Data:', JSON.stringify(data, null, 2));
+	}
+};
+
+/**
+ * Compare two arrays ignoring order.
+ */
+export const compareArraysIgnoreOrder = ({ actual, expected }) => {
+	if (actual.length !== expected.length) return false;
+	return expected.every((item) => actual.includes(item));
+};
+
+/**
+ * Assert arrays are equal ignoring order.
+ */
+export const assertArraysEqualIgnoreOrder = ({ actual, expected }) => {
+	if (!compareArraysIgnoreOrder({ actual, expected })) {
+		console.log('Expected (any order):', expected);
+		console.log('Actual:', actual);
+		throw new Error('Arrays are not equal (ignoring order)');
+	}
+};
 
 /** Grouped default export for all helper functions. */
 const helpers = {
@@ -1077,6 +1457,33 @@ const helpers = {
 	validateGetResponseStatusCode,
 	validatePostResponseStatusCode,
 	validateDeleteResponseStatusCode,
+	getDbRowCount,
+	findNullValuesInRows,
+	getNonNullRows,
+	assertDbRowCount,
+	assertNoNullValues,
+	assertNonNullRows,
+	findDuplicateValues,
+	assertUniqueColumnValues,
+	validateEmailFormat,
+	assertEmailFormat,
+	validateForeignKeyIntegrity,
+	assertOrderTotals,
+	retryWithBackoff,
+	queryDbWithRetry,
+	cleanupDbData,
+	insertTestData,
+	validatePhoneFormat,
+	validateUrlFormat,
+	validateDateFormat,
+	deepEqual,
+	assertDeepEqual,
+	filterDataByConditions,
+	groupDataByKey,
+	extractFields,
+	logTestStep,
+	compareArraysIgnoreOrder,
+	assertArraysEqualIgnoreOrder,
 };
 
 export default helpers;

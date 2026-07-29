@@ -51,7 +51,8 @@
     "pw:install": "playwright install",
     "pw:install:deps": "playwright install --with-deps",
     "pw:codegen": "playwright codegen",
-    "clean:results": "rm -rf test-results playwright-report"
+    "clean:results": "rm -rf test-results playwright-report",
+    "test:db": "playwright test tests/db.spec.js"
   },
   "keywords": [],
   "author": "KishorKumar D",
@@ -66,6 +67,7 @@
   "dependencies": {
     "axios": "^1.16.0",
     "crypto-js": "^4.2.0",
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "mysql2": "^3.12.0"
   }
 }
