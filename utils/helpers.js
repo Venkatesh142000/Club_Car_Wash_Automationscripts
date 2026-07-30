@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { expect } from "@playwright/test";
 import * as allure from "allure-js-commons";
+import AxeBuilder from "@axe-core/playwright";
 
 /**
  * Pause execution for a fixed duration.
@@ -995,6 +996,73 @@ export const validateDeleteResponseStatusCode = async (deleteStatusCode) => {
 	return result;
 };
 
+// Shared store: accessibility results collected across tests
+export const accessibilityResults = [];
+
+const ACCESSIBILITY_REPORT_DIR = path.resolve(process.cwd(), "accessibility-reports");
+
+const persistAccessibilityResult = (entry) => {
+  if (!entry) return null;
+
+  fs.mkdirSync(ACCESSIBILITY_REPORT_DIR, { recursive: true });
+
+  const safeTitle = (entry.pageTitle || entry.url || "page")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40) || "page";
+
+  const fileName = `a11y-${safeTitle}-${Date.now()}.json`;
+  const filePath = path.join(ACCESSIBILITY_REPORT_DIR, fileName);
+  fs.writeFileSync(filePath, JSON.stringify(entry, null, 2), "utf8");
+  return filePath;
+};
+
+/**
+ * Run an axe-core accessibility scan on the current page (or a given URL).
+ * Results are pushed into `accessibilityResults` for PDF generation at teardown.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} [url] Optional URL to navigate to before scanning
+ * @param {object} [options]
+ * @param {string[]} [options.tags]  axe rule tags e.g. ['wcag2a','wcag2aa']
+ * @param {string[]} [options.disableRules]  rule IDs to disable
+ */
+export const runAccessibilityScan = async (page, url, options = {}) => {
+  if (url) {
+    await page.goto(url);
+  }
+
+  const pageTitle = await page.title();
+  const pageUrl   = page.url();
+  const tags      = options.tags || ['wcag2a', 'wcag2aa', 'best-practice'];
+
+  let builder = new AxeBuilder({ page }).withTags(tags);
+  if (options.disableRules?.length) {
+    builder = builder.disableRules(options.disableRules);
+  }
+
+  const results = await builder.analyze();
+
+  const entry = {
+    url:        pageUrl,
+    pageTitle:  pageTitle || pageUrl,
+    violations: results.violations,
+    passes:     results.passes,
+    timestamp:  new Date().toISOString(),
+  };
+
+  accessibilityResults.push(entry);
+  const persistedFile = persistAccessibilityResult(entry);
+
+  await allureStep(
+    `Accessibility scan: ${entry.violations.length} violation(s) on "${pageTitle}"`
+  );
+
+  console.log(`[A11y] "${pageTitle}" — violations: ${entry.violations.length}, passes: ${entry.passes.length}${persistedFile ? ` — saved to ${persistedFile}` : ""}`);
+
+  return entry;
+};
+
 export const getDbRowCount = async ({ dbHelper, tableName }) => {
 	const rows = await dbHelper.query(`SELECT COUNT(*) AS total FROM ${tableName}`);
 	return Number(rows[0]?.total ?? 0);
@@ -1484,6 +1552,8 @@ const helpers = {
 	logTestStep,
 	compareArraysIgnoreOrder,
 	assertArraysEqualIgnoreOrder,
+	runAccessibilityScan,
+	accessibilityResults,
 };
 
 export default helpers;
