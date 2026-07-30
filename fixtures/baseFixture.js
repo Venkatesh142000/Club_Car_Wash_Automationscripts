@@ -3,6 +3,8 @@ import LoginPage from "../pages/loginPage.js";
 import AddToCart from "../pages/addToCartPage.js";
 import CheckOut from "../pages/checkOutPage.js"
 import Products from "../pages/productsPage.js"
+import AutomationLoginPage from "../pages/automationLoginPage.js";
+import AutomationHomePage from "../pages/automationHomePage.js";
 import {generateCheckoutCustomer} from "../utils/fakerHelper.js";
 import {ApiBase} from "../Api/BaseLayer.js";
 import { ApiClient } from "../Api/clientLayer.js";
@@ -17,6 +19,18 @@ export const test = base.extend({
 
 		const loginpage=new LoginPage(page, isMobile)
 		await use(loginpage)
+	},
+
+	automationLoginPage:async({page,isMobile},use)=>{
+
+		const automationLoginPage=new AutomationLoginPage(page, isMobile)
+		await use(automationLoginPage)
+	},
+
+	automationHomePage:async({page,isMobile},use)=>{
+
+		const automationHomePage=new AutomationHomePage(page, isMobile)
+		await use(automationHomePage)
 	},
 
 	addToCartPage:async({page,isMobile},use)=>{
@@ -70,6 +84,8 @@ export const test = base.extend({
       await dbHelper.disconnect();
     }
   },
+
+  
 
 	
 });

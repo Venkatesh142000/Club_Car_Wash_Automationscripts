@@ -8,15 +8,43 @@ export class ApiClient {
     return await this.apiContext.get(endpoint);
   }
 
-  async post(endpoint, data) {
+
+
+  async post(endpoint, data, isFormEncoded = false) {
+    if (isFormEncoded) {
+      return await this.apiContext.post(endpoint, {
+        form: data,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+    }
+
     return await this.apiContext.post(endpoint, {
-      data: JSON.stringify(data)
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
   }
 
   
-  async delete(endpoint) {
-    return await this.apiContext.delete(endpoint);
+  async delete(endpoint, data, isFormEncoded = false) {
+    if (isFormEncoded) {
+      return await this.apiContext.delete(endpoint, {
+        form: data,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+    }
+
+    return await this.apiContext.delete(endpoint, {
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
   }
 
   async put(endpoint, data) {

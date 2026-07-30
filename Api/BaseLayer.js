@@ -29,7 +29,6 @@ export class ApiBase {
 const apiContext = await request.newContext({
   baseURL: baseUrl,
   extraHTTPHeaders: {
-    Authorization: `Basic ${auth}`,
     "Content-Type": "application/json",
     Accept: "application/json",
   },
