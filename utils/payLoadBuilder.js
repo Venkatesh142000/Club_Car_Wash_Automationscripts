@@ -39,4 +39,43 @@ export class PayloadBuilder {
             properties
         };
     }
+
+    /**
+     * Build a full booking payload for POST /booking.
+     * All fields use faker so every call produces unique data.
+     * @param {object} [overrides={}] Optional field overrides.
+     */
+    buildBooking(overrides = {}) {
+        // Generate Date objects for checkin/checkout so refDate is valid
+        const checkinDate = faker.date.soon({ days: 30 });
+        const checkoutDate = faker.date.soon({ days: 5, refDate: checkinDate });
+        const checkin = checkinDate.toISOString().split('T')[0];
+        const checkout = checkoutDate.toISOString().split('T')[0];
+
+        return {
+            firstname:       faker.person.firstName(),
+            lastname:        faker.person.lastName(),
+            totalprice:      faker.number.int({ min: 100, max: 5000 }),
+            depositpaid:     faker.datatype.boolean(),
+            bookingdates: {
+                checkin,
+                checkout
+            },
+            additionalneeds: faker.helpers.arrayElement(['Breakfast', 'Lunch', 'Dinner', 'Airport transfer', 'None']),
+            ...overrides
+        };
+    }
+
+    /**
+     * Build an update payload for PUT /booking.
+     * Starts from a fresh buildBooking() and merges any provided overrides,
+     * so callers can patch only the fields they care about.
+     * @param {object} [overrides={}] Fields to override in the update payload.
+     */
+    buildBookingUpdate(overrides = {}) {
+        return {
+            ...this.buildBooking(),
+            ...overrides
+        };
+    }
 }

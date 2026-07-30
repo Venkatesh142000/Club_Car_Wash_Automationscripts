@@ -10,7 +10,7 @@ export class ApiClient {
 
   async post(endpoint, data) {
     return await this.apiContext.post(endpoint, {
-      json: data
+      data: JSON.stringify(data)
     });
   }
 
@@ -21,7 +21,13 @@ export class ApiClient {
 
   async put(endpoint, data) {
     return await this.apiContext.put(endpoint, {
-      json: data
+      data: JSON.stringify(data)
+    });
+  }
+
+  async patch(endpoint, data) {
+    return await this.apiContext.patch(endpoint, {
+      data: JSON.stringify(data)
     });
   }
 }

@@ -33,18 +33,12 @@ export default class LoginPage {
 		await this.loginButton.click();
 	}
 
-	async validateerrorMessage()
-	{
-
-		const messageText = (await this.messageError.textContent())?.trim() ?? "";
-
-		helpers.assertEqual({
-			actual: messageText,
-			expected: testData.invalidLoginMessage.message,
+	async validateerrorMessage() {
+		await helpers.assertVisible({ locator: this.messageError });
+		await helpers.assertText({
+			locator: this.messageError,
+			text: testData.invalidLoginMessage.message,
 		});
-		
-
-
 	}
 
 	
