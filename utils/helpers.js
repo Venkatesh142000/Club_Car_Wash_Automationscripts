@@ -262,7 +262,7 @@ export const isVisible = async ({ locator, timeout = 5000 }) => {
 export const waitForClickable = async ({ locator, timeout = 30000 }) => {
 	await locator.waitFor({ state: "attached", timeout });
 	await locator.waitFor({ state: "visible", timeout });
-	await expect(locator).toBeEnabled({ timeout });
+	await expect.soft(locator).toBeEnabled({ timeout });
 	return locator;
 };
 
@@ -501,7 +501,8 @@ export const assertStatus = async ({
  * @param {number} [params.timeout=30000] Assertion timeout.
  */
 export const assertVisible = async ({ locator, timeout = 30000 }) => {
-	await expect(locator).toBeVisible({ timeout });
+	await allureStep(`Assert visible: timeout=${timeout}`);
+	await expect.soft(locator).toBeVisible({ timeout });
 };
 
 /**
@@ -511,7 +512,8 @@ export const assertVisible = async ({ locator, timeout = 30000 }) => {
  * @param {number} [params.timeout=30000] Assertion timeout.
  */
 export const assertHidden = async ({ locator, timeout = 30000 }) => {
-	await expect(locator).toBeHidden({ timeout });
+	await allureStep(`Assert hidden: timeout=${timeout}`);
+	await expect.soft(locator).toBeHidden({ timeout });
 };
 
 /**
@@ -521,7 +523,8 @@ export const assertHidden = async ({ locator, timeout = 30000 }) => {
  * @param {number} [params.timeout=30000] Assertion timeout.
  */
 export const assertEnabled = async ({ locator, timeout = 30000 }) => {
-	await expect(locator).toBeEnabled({ timeout });
+	await allureStep(`Assert enabled: timeout=${timeout}`);
+	await expect.soft(locator).toBeEnabled({ timeout });
 };
 
 /**
@@ -531,7 +534,8 @@ export const assertEnabled = async ({ locator, timeout = 30000 }) => {
  * @param {number} [params.timeout=30000] Assertion timeout.
  */
 export const assertDisabled = async ({ locator, timeout = 30000 }) => {
-	await expect(locator).toBeDisabled({ timeout });
+	await allureStep(`Assert disabled: timeout=${timeout}`);
+	await expect.soft(locator).toBeDisabled({ timeout });
 };
 
 /**
@@ -542,7 +546,8 @@ export const assertDisabled = async ({ locator, timeout = 30000 }) => {
  * @param {number} [params.timeout=30000] Assertion timeout.
  */
 export const assertText = async ({ locator, text, timeout = 30000 }) => {
-	await expect(locator).toHaveText(text, { timeout });
+	await allureStep(`Assert exact text: ${String(text)}`);
+	await expect.soft(locator).toHaveText(text, { timeout });
 };
 
 /**
@@ -557,7 +562,8 @@ export const assertContainsText = async ({
 	text,
 	timeout = 30000,
 }) => {
-	await expect(locator).toContainText(text, { timeout });
+	await allureStep(`Assert contains text: ${String(text)}`);
+	await expect.soft(locator).toContainText(text, { timeout });
 };
 
 /**
@@ -568,7 +574,8 @@ export const assertContainsText = async ({
  * @param {number} [params.timeout=30000] Assertion timeout.
  */
 export const assertValue = async ({ locator, value, timeout = 30000 }) => {
-	await expect(locator).toHaveValue(value, { timeout });
+	await allureStep(`Assert value: ${String(value)}`);
+	await expect.soft(locator).toHaveValue(value, { timeout });
 };
 
 /**
@@ -585,7 +592,8 @@ export const assertAttribute = async ({
 	value,
 	timeout = 30000,
 }) => {
-	await expect(locator).toHaveAttribute(name, value, { timeout });
+	await allureStep(`Assert attribute '${name}' matches expected value`);
+	await expect.soft(locator).toHaveAttribute(name, value, { timeout });
 };
 
 /**
@@ -600,7 +608,8 @@ export const assertClassContains = async ({
 	className,
 	timeout = 30000,
 }) => {
-	await expect(locator).toHaveClass(className, { timeout });
+	await allureStep(`Assert class contains: ${String(className)}`);
+	await expect.soft(locator).toHaveClass(className, { timeout });
 };
 
 /**
@@ -610,7 +619,8 @@ export const assertClassContains = async ({
  * @param {number} [params.timeout=30000] Assertion timeout.
  */
 export const assertChecked = async ({ locator, timeout = 30000 }) => {
-	await expect(locator).toBeChecked({ timeout });
+	await allureStep(`Assert checked state`);
+	await expect.soft(locator).toBeChecked({ timeout });
 };
 
 /**
@@ -620,7 +630,8 @@ export const assertChecked = async ({ locator, timeout = 30000 }) => {
  * @param {number} [params.timeout=30000] Assertion timeout.
  */
 export const assertUnchecked = async ({ locator, timeout = 30000 }) => {
-	await expect(locator).not.toBeChecked({ timeout });
+	await allureStep(`Assert unchecked state`);
+	await expect.soft(locator).not.toBeChecked({ timeout });
 };
 
 /**
@@ -631,7 +642,8 @@ export const assertUnchecked = async ({ locator, timeout = 30000 }) => {
  * @param {number} [params.timeout=30000] Assertion timeout.
  */
 export const assertCount = async ({ locator, count, timeout = 30000 }) => {
-	await expect(locator).toHaveCount(count, { timeout });
+	await allureStep(`Assert element count equals ${count}`);
+	await expect.soft(locator).toHaveCount(count, { timeout });
 };
 
 /**
@@ -642,7 +654,8 @@ export const assertCount = async ({ locator, count, timeout = 30000 }) => {
  * @param {number} [params.timeout=30000] Assertion timeout.
  */
 export const assertUrl = async ({ page, url, timeout = 30000 }) => {
-	await expect(page).toHaveURL(url, { timeout });
+	await allureStep(`Assert URL matches expected pattern`);
+	await expect.soft(page).toHaveURL(url, { timeout });
 };
 
 /**
@@ -653,7 +666,8 @@ export const assertUrl = async ({ page, url, timeout = 30000 }) => {
  * @param {number} [params.timeout=30000] Assertion timeout.
  */
 export const assertTitle = async ({ page, title, timeout = 30000 }) => {
-	await expect(page).toHaveTitle(title, { timeout });
+	await allureStep(`Assert title matches expected value`);
+	await expect.soft(page).toHaveTitle(title, { timeout });
 };
 
 /**
@@ -663,7 +677,7 @@ export const assertTitle = async ({ page, title, timeout = 30000 }) => {
  * @param {unknown} params.expected Expected value.
  */
 export const assertEqual = ({ actual, expected }) => {
-	expect(actual).toEqual(expected);
+	expect.soft(actual).toEqual(expected);
 };
 
 /**
@@ -673,7 +687,7 @@ export const assertEqual = ({ actual, expected }) => {
  * @param {unknown} params.expected Expected value.
  */
 export const assertNotEqual = ({ actual, expected }) => {
-	expect(actual).not.toEqual(expected);
+	expect.soft(actual).not.toEqual(expected);
 };
 
 /**
@@ -683,7 +697,7 @@ export const assertNotEqual = ({ actual, expected }) => {
  * @param {unknown} params.expectedPart Expected subset or substring.
  */
 export const assertContains = ({ actual, expectedPart }) => {
-	expect(actual).toContain(expectedPart);
+	expect.soft(actual).toContain(expectedPart);
 };
 
 /**
@@ -701,7 +715,7 @@ export const assertTruthy = ({ value }) => {
  * @param {unknown} params.value Value under test.
  */
 export const assertFalsy = ({ value }) => {
-	expect(value).toBeFalsy();
+	expect.soft(value).toBeFalsy();
 };
 
 /**
@@ -711,7 +725,7 @@ export const assertFalsy = ({ value }) => {
  * @param {number} params.expected Expected lower bound.
  */
 export const assertGreaterThan = ({ actual, expected }) => {
-	expect(actual).toBeGreaterThan(expected);
+	expect.soft(actual).toBeGreaterThan(expected);
 };
 
 /**
@@ -721,7 +735,7 @@ export const assertGreaterThan = ({ actual, expected }) => {
  * @param {number} params.expected Expected upper bound.
  */
 export const assertLessThan = ({ actual, expected }) => {
-	expect(actual).toBeLessThan(expected);
+	expect.soft(actual).toBeLessThan(expected);
 };
 
 /**
@@ -948,43 +962,58 @@ export const allureBrowser = async (browserName) => {
 	await allure.parameter("Browser", browserName);
 };
 
-export const validateResponseBodyValue = async (expectedValue, actualValue) => {
+export const validateResponseBodyValue = async (expectedValue, actualValue, page = null) => {
 	const result = expectedValue === actualValue;
 
 	if (result) {
 		await allureStep(`Validating response body value pass->: Expected ${expectedValue} == Actual ${actualValue}`);
 	} else {
 		await allureStep(`Validating response body value fail->: Expected ${expectedValue} != Actual ${actualValue}`);
+		if (page) {
+			await allureScreenshot({ page }, "Response body mismatch");
+		}
 	}
+
+	expect.soft(actualValue).toEqual(expectedValue);
 
 	return result;
 };
 
-export const validateGetResponseStatusCode = async (getStatusCode) => {
+export const validateGetResponseStatusCode = async (getStatusCode, page = null) => {
 	const result = getStatusCode === 200;
 
 	if (result) {
 		await allureStep(`Validating GET response status code pass->: Expected 200 == Actual ${getStatusCode}`);
 	} else {
 		await allureStep(`Validating GET response status code fail->: Expected 200 != Actual ${getStatusCode}`);
+		if (page) {
+			await allureScreenshot({ page }, `GET status mismatch-${getStatusCode}`);
+		}
 	}
+
+	expect.soft(getStatusCode).toBe(200);
 
 	return result;
 };
 
-export const validatePostResponseStatusCode = async (postStatusCode) => {
+export const validatePostResponseStatusCode = async (postStatusCode, page = null) => {
 	const result = postStatusCode === 200 || postStatusCode === 201;
 
 	if (result) {
 		await allureStep(`Validating POST response status code pass->: Expected 200 or 201 == Actual ${postStatusCode}`);
 	} else {
 		await allureStep(`Validating POST response status code fail->: Expected 200 or 201 != Actual ${postStatusCode}`);
+		if (page) {
+			await allureScreenshot({ page }, `POST status mismatch-${postStatusCode}`);
+		}
 	}
+
+	expect.soft([200, 201]).toContain(postStatusCode);
 
 	return result;
 };
 
-export const validateDeleteResponseStatusCode = async (deleteStatusCode) => {
+export const validateDeleteResponseStatusCode = async (deleteStatusCode, page = null) => {
 	// Some servers return 201 on successful delete operations, accept it as well
 	const result = deleteStatusCode === 200 || deleteStatusCode === 201 || deleteStatusCode === 204;
 
@@ -992,7 +1021,12 @@ export const validateDeleteResponseStatusCode = async (deleteStatusCode) => {
 		await allureStep(`Validating DELETE response status code pass->: Expected 200, 201 or 204 == Actual ${deleteStatusCode}`);
 	} else {
 		await allureStep(`Validating DELETE response status code fail->: Expected 200, 201 or 204 != Actual ${deleteStatusCode}`);
+		if (page) {
+			await allureScreenshot({ page }, `DELETE status mismatch-${deleteStatusCode}`);
+		}
 	}
+
+	expect.soft([200, 201, 204]).toContain(deleteStatusCode);
 
 	return result;
 };
@@ -1590,6 +1624,10 @@ const helpers = {
 	runAccessibilityScan,
 	runAccessibilityAuditorScan,
 	accessibilityResults,
+
+	
+	
+	
 };
 
 export default helpers;
