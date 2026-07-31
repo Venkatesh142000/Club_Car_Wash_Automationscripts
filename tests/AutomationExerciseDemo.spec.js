@@ -98,14 +98,23 @@ test('Validate the Get All The Brands', async ({ page, apiClient, automationHome
         const responseBody = await response.json();
 
     const apiBrands = responseBody.brands.slice(0, 3).map(b => b.brand);
-    console.log('API - First 3 Brands:', apiBrands);
-
+    
     await automationHomePage.goto();
     await automationHomePage.NavigateToProductsPage();
     await helpers.runAccessibilityScan(page);
 
+
+
     const uiBrands = await automationHomePage.compareFirstThreeBrands(apiBrands);
-    console.log('UI - First 3 Brands:', uiBrands);
+   
+
+    }
+
+    catch (error) {
+        await helpers.allureScreenshot({ page }, 'Failure - Validate the Get All Product List');
+        throw error;
+    }
+
 
 })
 
