@@ -9,7 +9,8 @@ pipeline {
     }
 
     environment {
-        BASE_URL           = 'https://www.saucedemo.com/'
+        BASE_URL           = 'https://automationexercise.com'
+        API_BASE_URL       = 'https://automationexercise.com/api/'
         GITHUB_USER        = 'tejavardhangoud'
         GITHUB_REPO        = 'AutomationReport'
         MAX_BUILDS_TO_KEEP = '4'
@@ -97,6 +98,7 @@ pipeline {
                             sh '''
                                 echo "Running Playwright command: ${PLAYWRIGHT_COMMAND}"
                                 echo "BASE_URL=${BASE_URL}"
+                                echo "API_BASE_URL=${API_BASE_URL}"
                                 ${PLAYWRIGHT_COMMAND}
                                 echo "Playwright tests completed"
                             '''
