@@ -33,13 +33,19 @@ End-to-end test automation framework for the SauceDemo web application, built wi
 
 | Layer | Tool |
 |---|---|
-| Test runner | [@playwright/test](https://playwright.dev/) `^1.58` |
+| Test runner | [@playwright/test](https://playwright.dev/) `^1.58.2` |
 | Language | JavaScript (ES Modules, Node `>=18`) |
-| Reporting | [allure-playwright](https://github.com/allure-framework/allure-js), JUnit XML, Playwright HTML |
-| Test data | JSON fixtures + [@faker-js/faker](https://github.com/faker-js/faker) |
-| HTTP | [axios](https://github.com/axios/axios) + Playwright `request` |
-| Encryption | [crypto-js](https://github.com/brix/crypto-js) (AES) |
-| Env config | [dotenv](https://github.com/motdotla/dotenv) |
+| Reporting | [allure-playwright](https://github.com/allure-framework/allure-js) `^3.7.1`, JUnit XML, Playwright HTML |
+| Accessibility | [@axe-core/playwright](https://github.com/dequelabs/axe-core-npm) `^4.12.1` |
+| Test data | JSON fixtures + [@faker-js/faker](https://github.com/faker-js/faker) `^10.4.0` |
+| HTTP | [axios](https://github.com/axios/axios) `^1.16.0` + Playwright `request` |
+| Encryption | [crypto-js](https://github.com/brix/crypto-js) `^4.2.0` (AES) |
+| Env config | [dotenv](https://github.com/motdotla/dotenv) `^17.4.2` |
+| PDF generation | [pdfkit](https://pdfkit.org/) `^0.19.1` |
+| Markdown parsing | [marked](https://marked.js.org/) `^18.0.7` |
+| Database | [mysql2](https://github.com/sidorares/node-mysql2) `^3.12.0` |
+| Config | [yaml](https://github.com/eemeli/yaml) `^2.9.0` |
+| TypeScript types | [@types/node](https://www.npmjs.com/package/@types/node) `^25.3.0` |
 | Cloud grid | [Sauce Labs](https://saucelabs.com/) via `saucectl` |
 | CI | Jenkins (declarative pipeline) |
 | Notifications | Microsoft Teams (Adaptive Cards) + Email (HTML) |
