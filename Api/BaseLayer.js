@@ -11,7 +11,7 @@ export class ApiBase {
     const username = process.env.api_username || process.env.API_USERNAME;
     const password = process.env.api_password || process.env.API_PASSWORD;
 
-    /*if (!baseUrl) {
+    if (!baseUrl) {
       throw new Error(
         "Environment variable api_BASE_URL is required for API context creation."
       );
@@ -21,7 +21,7 @@ export class ApiBase {
       throw new Error(
         "Environment variables api_username (or API_USERNAME) and api_password (or API_PASSWORD) are required for API context creation."
       );
-    }*/
+    }
 
 
    
@@ -35,7 +35,7 @@ const apiContext = await request.newContext({
   },
 });
 
-   /* const apiContext = await request.newContext({
+    /*const apiContext = await request.newContext({
       baseURL: baseUrl,
       httpCredentials: {
         username,
