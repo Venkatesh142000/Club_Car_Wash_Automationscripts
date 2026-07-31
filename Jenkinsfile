@@ -15,6 +15,7 @@ pipeline {
         MAX_BUILDS_TO_KEEP = '4'
         ONEDRIVE_FOLDER    = '/Users/kalaltejavardhangoud/Library/CloudStorage/OneDrive-CDW/uiAutomationReport'
         PLAYWRIGHT_SCRIPT  = 'test:jenkins'
+        PLAYWRIGHT_COMMAND = 'npx playwright test ./tests/AutomationExerciseDemo.spec.js --project=chromium --headed'
         SAUCE_REGION       = 'eu-central-1'
         SAUCE_CREDENTIALS_ID = 'saucelabcred'
         TEAMS_WEBHOOK_URL  = credentials('teams-webhook-id')
@@ -94,9 +95,9 @@ pipeline {
                     } else {
                         catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                             sh '''
-                                echo "Running npm script: ${PLAYWRIGHT_SCRIPT}"
+                                echo "Running Playwright command: ${PLAYWRIGHT_COMMAND}"
                                 echo "BASE_URL=${BASE_URL}"
-                                CI=true npm run ${PLAYWRIGHT_SCRIPT}
+                                ${PLAYWRIGHT_COMMAND}
                                 echo "Playwright tests completed"
                             '''
                         }
