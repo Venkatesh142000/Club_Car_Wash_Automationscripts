@@ -1099,7 +1099,7 @@ export const runAccessibilityAuditorScan = async (page, options = {}) => {
 };
 
 export const getDbRowCount = async ({ dbHelper, tableName }) => {
-	const rows = await dbHelper.query(`SELECT COUNT(*) AS total FROM ${tableName}`);
+	const rows = await dbHelper.query('SELECT COUNT(*) AS total FROM ??', [tableName]);
 	return Number(rows[0]?.total ?? 0);
 };
 

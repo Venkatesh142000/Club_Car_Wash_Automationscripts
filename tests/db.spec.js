@@ -1,7 +1,10 @@
 import { test, expect } from '../fixtures/baseFixture.js';
 import helpers from '../utils/helpers.js';
 
-const isDbConfigured = !!process.env.DB_HOST && !!process.env.DB_USER && !!process.env.DB_PASSWORD && !!process.env.DB_NAME;
+const isDbConfigured =
+  !!(process.env.DB_USER || process.env.MYSQL_USER) &&
+  !!(process.env.DB_PASSWORD || process.env.MYSQL_PASSWORD) &&
+  !!(process.env.DB_NAME || process.env.MYSQL_DATABASE);
 
 test.describe('MySQL database validation', () => {
   test.beforeEach(async () => {
