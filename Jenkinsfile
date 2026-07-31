@@ -9,12 +9,14 @@ pipeline {
     }
 
     environment {
-        BASE_URL           = 'https://www.saucedemo.com/'
+        BASE_URL           = 'https://automationexercise.com'
+        API_BASE_URL       = 'https://automationexercise.com/api/'
         GITHUB_USER        = 'tejavardhangoud'
         GITHUB_REPO        = 'AutomationReport'
         MAX_BUILDS_TO_KEEP = '4'
         ONEDRIVE_FOLDER    = '/Users/kalaltejavardhangoud/Library/CloudStorage/OneDrive-CDW/uiAutomationReport'
         PLAYWRIGHT_SCRIPT  = 'test:jenkins'
+        PLAYWRIGHT_COMMAND = 'npx playwright test ./tests/AutomationExerciseDemo.spec.js --project=chromium --headed'
         SAUCE_REGION       = 'eu-central-1'
         SAUCE_CREDENTIALS_ID = 'saucelabcred'
         TEAMS_WEBHOOK_URL  = credentials('teams-webhook-id')
@@ -94,9 +96,10 @@ pipeline {
                     } else {
                         catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                             sh '''
-                                echo "Running npm script: ${PLAYWRIGHT_SCRIPT}"
+                                echo "Running Playwright command: ${PLAYWRIGHT_COMMAND}"
                                 echo "BASE_URL=${BASE_URL}"
-                                CI=true npm run ${PLAYWRIGHT_SCRIPT}
+                                echo "API_BASE_URL=${API_BASE_URL}"
+                                ${PLAYWRIGHT_COMMAND}
                                 echo "Playwright tests completed"
                             '''
                         }
@@ -159,35 +162,37 @@ pipeline {
 
         stage('Save Allure Report to OneDrive') {
             steps {
-                script {
-                    if (!env.ONEDRIVE_FOLDER?.trim()) {
-                        error('ONEDRIVE_FOLDER is not configured. Set it in Jenkins environment variables before saving reports to OneDrive.')
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    script {
+                        if (!env.ONEDRIVE_FOLDER?.trim()) {
+                            error('ONEDRIVE_FOLDER is not configured. Set it in Jenkins environment variables before saving reports to OneDrive.')
+                        }
+
+                        def timestamp  = new Date().format('yyyyMMdd_HHmmss')
+                        def buildLabel = "Build_${env.BUILD_NUMBER}_${timestamp}"
+                        def baseFolder = env.ONEDRIVE_FOLDER.trim()
+                        def destFolder = "${baseFolder}/${buildLabel}"
+                        env.ONEDRIVE_BUILD_FOLDER = destFolder
+
+                        sh """
+                            mkdir -p "${baseFolder}"
+                            mkdir -p "${destFolder}"
+                            cp -r "${WORKSPACE}/allure-report/." "${destFolder}/"
+
+                            report_folders=\$(find "${baseFolder}" -mindepth 1 -maxdepth 1 -type d -name 'Build_*' | sort -r)
+                            old_folders=\$(printf '%s\n' "\$report_folders" | awk 'NR > 30')
+
+                            if [ -n "\$old_folders" ]; then
+                                printf '%s\n' "\$old_folders" | while IFS= read -r old_folder; do
+                                    [ -n "\$old_folder" ] || continue
+                                    rm -rf "\$old_folder"
+                                    echo "Removed old OneDrive report: \$old_folder"
+                                done
+                            fi
+
+                            echo "Report saved to OneDrive: ${destFolder}"
+                        """
                     }
-
-                    def timestamp  = new Date().format('yyyyMMdd_HHmmss')
-                    def buildLabel = "Build_${env.BUILD_NUMBER}_${timestamp}"
-                    def baseFolder = env.ONEDRIVE_FOLDER.trim()
-                    def destFolder = "${baseFolder}/${buildLabel}"
-                    env.ONEDRIVE_BUILD_FOLDER = destFolder
-
-                    sh """
-                        mkdir -p "${baseFolder}"
-                        mkdir -p "${destFolder}"
-                        cp -r "${WORKSPACE}/allure-report/." "${destFolder}/"
-
-                        report_folders=\$(find "${baseFolder}" -mindepth 1 -maxdepth 1 -type d -name 'Build_*' | sort -r)
-                        old_folders=\$(printf '%s\n' "\$report_folders" | awk 'NR > 30')
-
-                        if [ -n "\$old_folders" ]; then
-                            printf '%s\n' "\$old_folders" | while IFS= read -r old_folder; do
-                                [ -n "\$old_folder" ] || continue
-                                rm -rf "\$old_folder"
-                                echo "Removed old OneDrive report: \$old_folder"
-                            done
-                        fi
-
-                        echo "Report saved to OneDrive: ${destFolder}"
-                    """
                 }
             }
         }

@@ -24,7 +24,8 @@ export class ApiBase {
     }
 
 
-    const auth = Buffer.from(`${username}:${password}`).toString("base64");
+   
+   //   const auth = Buffer.from(`${username}:${password}`).toString("base64");
 
 const apiContext = await request.newContext({
   baseURL: baseUrl,
@@ -34,7 +35,7 @@ const apiContext = await request.newContext({
   },
 });
 
-   /* const apiContext = await request.newContext({
+    /*const apiContext = await request.newContext({
       baseURL: baseUrl,
       httpCredentials: {
         username,
