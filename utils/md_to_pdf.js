@@ -328,7 +328,6 @@ export const generatePdfFromMarkdown = async ({ markdown, outputPath, canonicalP
 		fs.copyFileSync(outputPath, canonicalPdfPath);
 	}
 
-	console.log("Premium PDF generated successfully:", outputPath);
 	if (canonicalPdfPath) {
 		console.log("Canonical PDF updated:", canonicalPdfPath);
 	}

@@ -16,6 +16,6 @@ export async function generateAccessibilityPDF(scanResults, outputPath = "access
 		outputPath,
 	});
 
-	console.log(`\n[A11y] PDF report saved: ${generatedPath}\n`);
+	console.log(`\n[A11y] report saved in : ${generatedPath}\n`);
 	return generatedPath;
 }
