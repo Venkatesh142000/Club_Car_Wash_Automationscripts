@@ -1,0 +1,125 @@
+accessibility-auditor:
+  name: Accessibility Auditor
+  description: Enterprise-grade accessibility compliance testing using Playwright MCP and axe-core with professional reporting, scoring, and remediation guidance
+  version: 1.0.0
+  
+  capabilities:
+    # Core Testing
+    - wcag-2.0-compliance
+    - wcag-2.1-compliance
+    - wcag-2.2-compliance
+    - section-508-compliance
+    - configurable-conformance-levels
+    
+    # Browser Automation
+    - playwright-mcp-integration
+    - multi-viewport-testing
+    - responsive-testing
+    - screenshot-evidence
+    
+    # Analysis
+    - axe-core-testing
+    - accessibility-scoring
+    - grade-calculation
+    - trend-analysis
+    - technology-detection
+    
+    # Reporting
+    - executive-summary
+    - professional-reports
+    - remediation-roadmap
+    - wcag-criterion-coverage
+    - manual-testing-checklist
+    
+    # Output Formats
+    - markdown-export
+    - json-export
+    - csv-export
+    - html-export
+    - pdf-export
+    
+    # Workflow
+    - three-phase-workflow
+    - read-only-testing
+    - fix-suggestions
+    - no-auto-apply
+  
+  tools:
+    required:
+      - playwright-mcp
+    embedded:
+      - axe-core-4.12.1
+  
+  config:
+    config_file: accessibility/info.yml
+    url_file: accessibility/accessibility-url.txt
+    
+    defaults:
+      wcag_version: "2.2"
+      conformance_level: "AA"
+      viewport: { width: 1440, height: 900 }
+      output_format: markdown
+      screenshots: true
+  
+  phases:
+    configure:
+      description: Load configuration and validate URLs
+      auto_run: true
+      order: 1
+      
+    scan:
+      description: Navigate URLs, run axe-core tests, generate scored report
+      auto_run: true
+      order: 2
+      mode: read-only
+      outputs:
+        - accessibility-report
+        - screenshots
+        - json-data
+      
+    fix:
+      description: Generate framework-agnostic remediation guidance
+      auto_run: false
+      order: 3
+      trigger: user_request
+      outputs:
+        - remediation-guide
+  
+  scoring:
+    formula: "((total_testable - weighted_violations) / total_testable) * 100"
+    weights:
+      critical: 25
+      high: 10
+      medium: 3
+      low: 1
+    grades:
+      A+: { min: 95, status: "EXCELLENT" }
+      A: { min: 90, status: "VERY GOOD" }
+      B: { min: 80, status: "GOOD" }
+      C: { min: 70, status: "FAIR" }
+      D: { min: 60, status: "POOR" }
+      F: { min: 0, status: "FAILING" }
+  
+  safety:
+    read_only: true
+    no_auto_apply: true
+    preserve_existing: true
+    no_form_submission: true
+    no_authentication: true
+    no_state_changes: true
+  
+  report:
+    formats:
+      - pdf
+      - pdf
+    sections:
+      - executive-summary
+      - score-dashboard
+      - compliance-overview
+      - trend-analysis
+      - priority-roadmap
+      - detailed-findings
+      - wcag-coverage
+      - manual-checklist
+    location: .github/reports/accessibility/
+    naming: "accessibility-report-{date}-{time}.{format}"

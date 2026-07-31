@@ -1,7 +1,7 @@
 import {test} from '../fixtures/baseFixture.js';
 import  helpers from '../utils/helpers.js';
 
-import testData from '../testData.json' with { type: 'json' };
+import testData from '../fixtures/data/testData.json' with { type: 'json' };
 test.describe("Login Functionality",()=>{
 
     test.beforeEach(async()=>{

@@ -5,7 +5,7 @@ export default async function globalTeardown(fullResult) {
 
   try {
     console.log(`[Xray] Playwright run finished with status: ${runStatus}. Uploading results to Xray...`);
-    execFileSync("node", ["updateTestResults.js"], {
+    execFileSync("node", ["teardown/updateTestResults.js"], {
       stdio: "inherit",
       cwd: process.cwd(),
       env: process.env

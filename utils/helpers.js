@@ -3,6 +3,7 @@ import path from "node:path";
 import { expect } from "@playwright/test";
 import * as allure from "allure-js-commons";
 import AxeBuilder from "@axe-core/playwright";
+import { getAxeTags, loadAccessibilityConfig } from "./accessibilityAuditConfig.js";
 
 /**
  * Pause execution for a fixed duration.
@@ -1000,6 +1001,7 @@ export const validateDeleteResponseStatusCode = async (deleteStatusCode) => {
 export const accessibilityResults = [];
 
 const ACCESSIBILITY_REPORT_DIR = path.resolve(process.cwd(), "accessibility-reports");
+const A11Y_RUN_ID = process.env.A11Y_RUN_ID || "manual-run";
 
 const persistAccessibilityResult = (entry) => {
   if (!entry) return null;
@@ -1012,7 +1014,7 @@ const persistAccessibilityResult = (entry) => {
     .replace(/^-+|-+$/g, "")
     .slice(0, 40) || "page";
 
-  const fileName = `a11y-${safeTitle}-${Date.now()}.json`;
+	const fileName = `a11y-${A11Y_RUN_ID}-${safeTitle}-${Date.now()}.json`;
   const filePath = path.join(ACCESSIBILITY_REPORT_DIR, fileName);
   fs.writeFileSync(filePath, JSON.stringify(entry, null, 2), "utf8");
   return filePath;
@@ -1026,6 +1028,7 @@ const persistAccessibilityResult = (entry) => {
  * @param {object} [options]
  * @param {string[]} [options.tags]  axe rule tags e.g. ['wcag2a','wcag2aa']
  * @param {string[]} [options.disableRules]  rule IDs to disable
+ * @param {Record<string, unknown>} [options.metadata] Additional audit metadata to persist.
  */
 export const runAccessibilityScan = async (page, url, options = {}) => {
   if (url) {
@@ -1049,6 +1052,8 @@ export const runAccessibilityScan = async (page, url, options = {}) => {
     violations: results.violations,
     passes:     results.passes,
     timestamp:  new Date().toISOString(),
+		runId:      A11Y_RUN_ID,
+		...(options.metadata || {}),
   };
 
   accessibilityResults.push(entry);
@@ -1061,6 +1066,36 @@ export const runAccessibilityScan = async (page, url, options = {}) => {
   console.log(`[A11y] "${pageTitle}" — violations: ${entry.violations.length}, passes: ${entry.passes.length}${persistedFile ? ` — saved to ${persistedFile}` : ""}`);
 
   return entry;
+};
+
+/**
+ * Run accessibility scan using Accessibility Auditor configuration.
+ * @param {import('@playwright/test').Page} page
+ * @param {object} [options]
+ * @param {string} [options.url] Optional URL to navigate before scan
+ * @param {Record<string, unknown>} [options.metadata] Additional metadata to attach
+ * @param {string[]} [options.tags] Optional explicit axe tags override
+ * @param {string[]} [options.disableRules] Optional explicit disabled rules override
+ */
+export const runAccessibilityAuditorScan = async (page, options = {}) => {
+	const config = loadAccessibilityConfig();
+	const tags = Array.isArray(options.tags) && options.tags.length
+		? options.tags
+		: getAxeTags(config);
+	const disableRules = Array.isArray(options.disableRules)
+		? options.disableRules
+		: (config?.audit?.exclude_rules || []);
+
+	const metadata = {
+		auditStandard: `WCAG ${config?.audit?.wcag_version || "2.2"} ${config?.audit?.conformance_level || "AA"}`,
+		...(options.metadata || {}),
+	};
+
+	return runAccessibilityScan(page, options.url, {
+		tags,
+		disableRules,
+		metadata,
+	});
 };
 
 export const getDbRowCount = async ({ dbHelper, tableName }) => {
@@ -1553,6 +1588,7 @@ const helpers = {
 	compareArraysIgnoreOrder,
 	assertArraysEqualIgnoreOrder,
 	runAccessibilityScan,
+	runAccessibilityAuditorScan,
 	accessibilityResults,
 };
 

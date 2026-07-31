@@ -6,6 +6,9 @@ dotenv.config({ quiet: true });
 const DESKTOP_VIEWPORT = { width: 1728, height: 972 };
 const RETRY = Number.parseInt(process.env.RETRY ?? "0", 10);
 const RETRIES = Number.isInteger(RETRY) && RETRY >= 0 ? RETRY : 0;
+const A11Y_RUN_ID = process.env.A11Y_RUN_ID
+	?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+process.env.A11Y_RUN_ID = A11Y_RUN_ID;
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -20,8 +23,8 @@ const RETRIES = Number.isInteger(RETRY) && RETRY >= 0 ? RETRY : 0;
 export default defineConfig({
 	testDir: "./tests",
 	timeout: 500000,
-	// globalTeardown: "./updateTestResults.js",
-	globalTeardown: "./accessibilityTeardown.js",
+	// globalTeardown: "./teardown/updateTestResults.js",
+	globalTeardown: "./teardown/accessibilityTeardown.js",
 	/* Run tests in files in parallel */
 	// fullyParallel: true,
 	/* Fail the build on CI if you accidentally left test.only in the source code. */

@@ -13,7 +13,7 @@ test('Create account with custom data', async({page, apiClient, automationLoginP
 
    await helpers.validatePostResponseStatusCode(response.status());
    await automationLoginPage.goto();
-   await helpers.runAccessibilityScan(page);
+    await helpers.runAccessibilityAuditorScan(page);
    await automationLoginPage.fillLoginForm(payload.email, payload.password);
    await automationLoginPage.validateSuccessfulLogin();
    const deleteAccount = await apiClient.delete('deleteAccount', { email: payload.email, password: payload.password }, true);
@@ -43,7 +43,7 @@ test('Validate the Get All Product List',async({page, apiClient, automationLogin
 
     await automationHomePage.goto();
     await automationHomePage.NavigateToProductsPage();
-    await helpers.runAccessibilityScan(page);
+    await helpers.runAccessibilityAuditorScan(page);
 
     const uiNames = await automationHomePage.compareFirstThreeProductNames(apiNames);
     const uiPrices = await automationHomePage.compareFirstThreeProductPrices(apiPrices);
@@ -61,7 +61,7 @@ test('Validate the Get All The Brands',async({page, apiClient, automationHomePag
 
     await automationHomePage.goto();
     await automationHomePage.NavigateToProductsPage();
-    await helpers.runAccessibilityScan(page);
+    await helpers.runAccessibilityAuditorScan(page);
 
     const uiBrands = await automationHomePage.compareFirstThreeBrands(apiBrands);
     console.log('UI - First 3 Brands:', uiBrands);
