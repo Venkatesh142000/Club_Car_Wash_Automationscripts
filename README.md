@@ -60,22 +60,37 @@ End-to-end test automation framework for the SauceDemo web application, built wi
 - ✅ **Cross-browser** projects: Chromium, Firefox, WebKit + mobile (Android, iPhone, iPad)
 - ✅ **Cloud execution** via Sauce Labs (`saucectl`)
 - ✅ **Rich Allure reports** with screenshots, video, traces, severity, tags, TMS links
+- ✅ **Accessibility testing** with Axe-Core automation and PDF audit reports
 - ✅ **CI-ready** Jenkinsfile with Allure publishing to GitHub Pages + OneDrive archival
 - ✅ **Teams + Email notifications** with QuickChart doughnut chart and pass-rate banner
 - ✅ **Jira Xray** result upload via `teardown/updateTestResults.js`
 - ✅ **Secret handling** via AES encryption + `.env`
 - ✅ **Faker-powered** dynamic test data for forms and payloads
 - ✅ **Tag-based execution** (`@smoke`, `@regression`)
+- ✅ **PDF generation** for accessibility audit reports
+- ✅ **Database support** (MySQL integration for test data management)
 
 ---
 
 ## Project Structure
 
 ```
-DV_QA_E2EAutomationSuite/
+QallyTest/
 ├── Api/
 │   ├── BaseLayer.js              # Playwright APIRequestContext factory (auth, baseURL)
-│   └── clientLayer.js            # ApiClient (get/post/put/delete wrappers)
+│   ├── clientLayer.js            # ApiClient (get/post/put/delete wrappers)
+│   └── dashboard/                # Dashboard API services
+│       ├── backend/              # Backend API layer
+│       ├── frontend/             # Frontend API layer
+│       └── run-history/          # Test run history tracking
+├── accessibility/
+│   ├── accessibility-auditor.md  # Accessibility auditor
+│   ├── accessibility-instructions.md  # Testing guidelines
+│   ├── accessibility-url.txt     # Accessibility test URLs
+│   ├── info.yml                  # Accessibility configuration
+│   ├── README.md                 # Accessibility testing guide
+│   └── assets/                   # Accessibility audit assets
+├── accessibility-reports/        # Generated accessibility audit reports
 ├── fixtures/
 │   └── baseFixture.js            # Custom Playwright test fixtures (POM injection)
 ├── pages/
@@ -92,10 +107,15 @@ DV_QA_E2EAutomationSuite/
 │   ├── helpers.js                # 200+ shared utilities (actions, assertions, allure, api)
 │   ├── fakerHelper.js            # Synthetic data generators
 │   └── payLoadBuilder.js         # API request payload builder
+├── data/
+│   └── testData.json             # Static test data (users, expected messages)
+├── db/
+│   └── (database connection & migration scripts)
 ├── .sauce/
 │   └── config.yml                # Sauce Labs (saucectl) configuration
 ├── .github/                      # GitHub workflows (if present)
 ├── allure-results/               # Raw Allure result JSONs (generated)
+├── accessibility-reports/        # Accessibility audit HTML reports (generated)
 ├── playwright-report/            # Playwright HTML report (generated)
 ├── test-results/                 # Screenshots, videos, traces (generated)
 ├── teardown/
@@ -104,7 +124,6 @@ DV_QA_E2EAutomationSuite/
 │   └── updateTestResults.js      # Upload JUnit results to Jira Xray
 ├── Jenkinsfile                   # Declarative Jenkins pipeline
 ├── playwright.config.js          # Playwright config (projects, reporters, timeouts)
-├── fixtures/data/testData.json   # Static test data (users, expected messages)
 ├── results.xml                   # JUnit output (generated)
 ├── package.json                  # Scripts + dependencies
 └── README.md                     # ← you are here
