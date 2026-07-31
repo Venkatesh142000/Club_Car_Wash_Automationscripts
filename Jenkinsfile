@@ -162,35 +162,37 @@ pipeline {
 
         stage('Save Allure Report to OneDrive') {
             steps {
-                script {
-                    if (!env.ONEDRIVE_FOLDER?.trim()) {
-                        error('ONEDRIVE_FOLDER is not configured. Set it in Jenkins environment variables before saving reports to OneDrive.')
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    script {
+                        if (!env.ONEDRIVE_FOLDER?.trim()) {
+                            error('ONEDRIVE_FOLDER is not configured. Set it in Jenkins environment variables before saving reports to OneDrive.')
+                        }
+
+                        def timestamp  = new Date().format('yyyyMMdd_HHmmss')
+                        def buildLabel = "Build_${env.BUILD_NUMBER}_${timestamp}"
+                        def baseFolder = env.ONEDRIVE_FOLDER.trim()
+                        def destFolder = "${baseFolder}/${buildLabel}"
+                        env.ONEDRIVE_BUILD_FOLDER = destFolder
+
+                        sh """
+                            mkdir -p "${baseFolder}"
+                            mkdir -p "${destFolder}"
+                            cp -r "${WORKSPACE}/allure-report/." "${destFolder}/"
+
+                            report_folders=\$(find "${baseFolder}" -mindepth 1 -maxdepth 1 -type d -name 'Build_*' | sort -r)
+                            old_folders=\$(printf '%s\n' "\$report_folders" | awk 'NR > 30')
+
+                            if [ -n "\$old_folders" ]; then
+                                printf '%s\n' "\$old_folders" | while IFS= read -r old_folder; do
+                                    [ -n "\$old_folder" ] || continue
+                                    rm -rf "\$old_folder"
+                                    echo "Removed old OneDrive report: \$old_folder"
+                                done
+                            fi
+
+                            echo "Report saved to OneDrive: ${destFolder}"
+                        """
                     }
-
-                    def timestamp  = new Date().format('yyyyMMdd_HHmmss')
-                    def buildLabel = "Build_${env.BUILD_NUMBER}_${timestamp}"
-                    def baseFolder = env.ONEDRIVE_FOLDER.trim()
-                    def destFolder = "${baseFolder}/${buildLabel}"
-                    env.ONEDRIVE_BUILD_FOLDER = destFolder
-
-                    sh """
-                        mkdir -p "${baseFolder}"
-                        mkdir -p "${destFolder}"
-                        cp -r "${WORKSPACE}/allure-report/." "${destFolder}/"
-
-                        report_folders=\$(find "${baseFolder}" -mindepth 1 -maxdepth 1 -type d -name 'Build_*' | sort -r)
-                        old_folders=\$(printf '%s\n' "\$report_folders" | awk 'NR > 30')
-
-                        if [ -n "\$old_folders" ]; then
-                            printf '%s\n' "\$old_folders" | while IFS= read -r old_folder; do
-                                [ -n "\$old_folder" ] || continue
-                                rm -rf "\$old_folder"
-                                echo "Removed old OneDrive report: \$old_folder"
-                            done
-                        fi
-
-                        echo "Report saved to OneDrive: ${destFolder}"
-                    """
                 }
             }
         }
