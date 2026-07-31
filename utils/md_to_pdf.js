@@ -303,8 +303,10 @@ export const generatePdfFromMarkdown = async ({ markdown, outputPath, canonicalP
 	fs.writeFileSync(htmlPath, html, "utf-8");
 
 	const browser = await chromium.launch({ headless: true });
+	let context;
 	try {
-		const page = await browser.newPage();
+		context = await browser.newContext({ javaScriptEnabled: false });
+		const page = await context.newPage();
 		await page.goto("file://" + path.resolve(htmlPath));
 		await page.pdf({
 			path: outputPath,
@@ -313,6 +315,9 @@ export const generatePdfFromMarkdown = async ({ markdown, outputPath, canonicalP
 			margin: { top: "20px", bottom: "20px", left: "20px", right: "20px" },
 		});
 	} finally {
+		if (context) {
+			await context.close();
+		}
 		await browser.close();
 		if (fs.existsSync(htmlPath)) {
 			fs.unlinkSync(htmlPath);
