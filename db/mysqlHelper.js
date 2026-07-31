@@ -48,7 +48,8 @@ export class MySqlHelper {
 
   async query(sql, params = []) {
     const connection = await this.connect();
-    const [rows] = await connection.execute(sql, params);
+    // Use query() so mysql2 identifier placeholders (??) are formatted correctly.
+    const [rows] = await connection.query(sql, params);
     return rows;
   }
 

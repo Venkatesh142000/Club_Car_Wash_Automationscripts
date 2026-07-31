@@ -52,13 +52,15 @@
     "pw:install:deps": "playwright install --with-deps",
     "pw:codegen": "playwright codegen",
     "clean:results": "rm -rf test-results playwright-report",
-    "test:db": "playwright test tests/db.spec.js"
+    "test:db": "playwright test tests/db.spec.js",
+    "test:a11y:auditor": "CI=1 A11Y_FAST=1 playwright test tests/accessibilityAuditor.spec.js --project=chromium --workers=1 --reporter=line"
   },
   "keywords": [],
   "author": "KishorKumar D",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@faker-js/faker": "^10.4.0",
     "@playwright/test": "^1.58.2",
     "@types/node": "^25.3.0",
@@ -68,6 +70,9 @@
     "axios": "^1.16.0",
     "crypto-js": "^4.2.0",
     "dotenv": "^17.4.2",
-    "mysql2": "^3.12.0"
+    "marked": "^18.0.7",
+    "mysql2": "^3.12.0",
+    "pdfkit": "^0.19.1",
+    "yaml": "^2.9.0"
   }
 }

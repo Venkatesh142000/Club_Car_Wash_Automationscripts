@@ -56,7 +56,7 @@ End-to-end test automation framework for the SauceDemo web application, built wi
 - ✅ **Rich Allure reports** with screenshots, video, traces, severity, tags, TMS links
 - ✅ **CI-ready** Jenkinsfile with Allure publishing to GitHub Pages + OneDrive archival
 - ✅ **Teams + Email notifications** with QuickChart doughnut chart and pass-rate banner
-- ✅ **Jira Xray** result upload via `updateTestResults.js`
+- ✅ **Jira Xray** result upload via `teardown/updateTestResults.js`
 - ✅ **Secret handling** via AES encryption + `.env`
 - ✅ **Faker-powered** dynamic test data for forms and payloads
 - ✅ **Tag-based execution** (`@smoke`, `@regression`)
@@ -92,13 +92,13 @@ DV_QA_E2EAutomationSuite/
 ├── allure-results/               # Raw Allure result JSONs (generated)
 ├── playwright-report/            # Playwright HTML report (generated)
 ├── test-results/                 # Screenshots, videos, traces (generated)
-├── cryptoHelper.js               # AES encrypt/decrypt class
-├── encrypt_creds.js              # CLI script: print encrypted creds
-├── updateTestResults.js          # Upload JUnit results to Jira Xray
-├── xrayGlobalTeardown.js         # Playwright global teardown for Xray
+├── teardown/
+│   ├── accessibilityTeardown.js  # Playwright teardown for accessibility PDF
+│   ├── xrayGlobalTeardown.js     # Playwright teardown for Xray upload
+│   └── updateTestResults.js      # Upload JUnit results to Jira Xray
 ├── Jenkinsfile                   # Declarative Jenkins pipeline
 ├── playwright.config.js          # Playwright config (projects, reporters, timeouts)
-├── testData.json                 # Static test data (users, expected messages)
+├── fixtures/data/testData.json   # Static test data (users, expected messages)
 ├── results.xml                   # JUnit output (generated)
 ├── package.json                  # Scripts + dependencies
 └── README.md                     # ← you are here
@@ -232,6 +232,26 @@ npm run test:smoke:parallel        # @smoke with workers=2
 npm run test:sauce                 # saucectl run --config .sauce/config.yml
 ```
 
+### Accessibility Auditor
+
+```bash
+npm run test:a11y:auditor          # config-driven WCAG audit (chromium, serial)
+```
+
+The accessibility auditor run reads:
+
+- `accessibility/info.yml` for auditor defaults and report settings
+- `accessibility/accessibility-url.txt` for target URLs
+
+Generated artifacts:
+
+- `.github/reports/accessibility/accessibility-report-YYYY-MM-DD-HH-mm.md`
+- `.github/reports/accessibility/accessibility-report-YYYY-MM-DD-HH-mm.json`
+- `.github/reports/accessibility/accessibility-report-YYYY-MM-DD-HH-mm.csv`
+- `.github/reports/accessibility/accessibility-report-YYYY-MM-DD-HH-mm.html`
+- `.github/reports/accessibility/accessibility-report-YYYY-MM-DD-HH-mm.pdf`
+- `accessibility-report.pdf` (canonical copy at repo root)
+
 ### Re-runs & misc
 
 ```bash
@@ -356,7 +376,7 @@ test('create resource', async ({ apiClient, payLoader }) => {
 
 ### Test Data
 
-- **Static**: [testData.json](testData.json) — usernames, expected messages, fixtures.
+- **Static**: [fixtures/data/testData.json](fixtures/data/testData.json) — usernames, expected messages, fixtures.
 - **Dynamic**: [utils/fakerHelper.js](utils/fakerHelper.js) — `generateCheckoutCustomer()` etc., powered by `@faker-js/faker`.
 - **Payloads**: [utils/payLoadBuilder.js](utils/payLoadBuilder.js) — builds parameterized API request bodies.
 
@@ -370,10 +390,10 @@ For secrets that must live in `.env` but not in plain text:
    export SECRET_KEY="some-long-random-string"
    ```
 
-2. Edit [encrypt_creds.js](encrypt_creds.js) with the plaintext values, then run:
+2. Edit [utils/encrypt_creds.js](utils/encrypt_creds.js) with the plaintext values, then run:
 
    ```bash
-   node encrypt_creds.js
+    node utils/encrypt_creds.js
    ```
 
 3. Copy the printed `ENCRYPTED_USERNAME` / `ENCRYPTED_PASSWORD` into `.env`.
@@ -381,7 +401,7 @@ For secrets that must live in `.env` but not in plain text:
 4. In your test, decrypt at runtime:
 
    ```javascript
-   import CommonUtils from '../cryptoHelper.js';
+    import CommonUtils from '../utils/cryptoHelper.js';
    const crypto = new CommonUtils();
    const username = crypto.decryptKey(process.env.ENCRYPTED_USERNAME);
    ```
@@ -461,10 +481,10 @@ In Jenkins this is automatic via the `saucelabcred` credential.
 
 ## Jira Xray Integration
 
-[updateTestResults.js](updateTestResults.js) ingests `results.xml` into a Jira Xray Test Execution.
+[teardown/updateTestResults.js](teardown/updateTestResults.js) ingests `results.xml` into a Jira Xray Test Execution.
 
 ```bash
-node updateTestResults.js
+node teardown/updateTestResults.js
 ```
 
 Reads env vars:
@@ -479,7 +499,7 @@ XRAY_TEST_EXEC_KEY=ABC-123  # the Test Execution issue key
 To run automatically after every Playwright execution, uncomment in [playwright.config.js](playwright.config.js):
 
 ```javascript
-globalTeardown: "./updateTestResults.js"
+globalTeardown: "./teardown/updateTestResults.js"
 ```
 
 ---
@@ -516,7 +536,7 @@ cartPage: async ({ page, isMobile }, use) => {
 // tests/cart.spec.js
 import { test } from '../fixtures/baseFixture.js';
 import helpers from '../utils/helpers.js';
-import testData from '../testData.json' with { type: 'json' };
+import testData from '../fixtures/data/testData.json' with { type: 'json' };
 
 test.describe('Cart', () => {
     test.beforeEach(async () => {

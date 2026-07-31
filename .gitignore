@@ -12,3 +12,7 @@ allure-report/
 package-lock.json
 results.xml
 .DS_Store
+/.github/reports
+/accessibility-reports
+/.npm-cache
+/accessibility-reports
