@@ -4,6 +4,7 @@ import { expect } from "@playwright/test";
 import * as allure from "allure-js-commons";
 import AxeBuilder from "@axe-core/playwright";
 import { getAxeTags, loadAccessibilityConfig } from "./accessibilityAuditConfig.js";
+import { captureViolationScreenshots } from "./accessibilityScreenshot.js";
 
 /**
  * Pause execution for a fixed duration.
@@ -1050,7 +1051,8 @@ const persistAccessibilityResult = (entry) => {
 
 	const fileName = `a11y-${A11Y_RUN_ID}-${safeTitle}-${Date.now()}.json`;
   const filePath = path.join(ACCESSIBILITY_REPORT_DIR, fileName);
-  fs.writeFileSync(filePath, JSON.stringify(entry, null, 2), "utf8");
+  // Strip in-memory base64 screenshots — only the file path (_screenshotPath) is persisted
+  fs.writeFileSync(filePath, JSON.stringify(entry, (key, value) => key === "_screenshot" ? undefined : value, 2), "utf8");
   return filePath;
 };
 
@@ -1089,6 +1091,14 @@ export const runAccessibilityScan = async (page, url, options = {}) => {
 		runId:      A11Y_RUN_ID,
 		...(options.metadata || {}),
   };
+
+  const config = loadAccessibilityConfig();
+  if (config?.report?.screenshots && entry.violations.length > 0) {
+    const outputDir = path.resolve(config?.report?.output_dir || ".github/reports/accessibility");
+    const evidenceDir = path.join(outputDir, "screenshots");
+    fs.mkdirSync(evidenceDir, { recursive: true });
+    await captureViolationScreenshots(page, entry.violations, evidenceDir);
+  }
 
   accessibilityResults.push(entry);
   const persistedFile = persistAccessibilityResult(entry);

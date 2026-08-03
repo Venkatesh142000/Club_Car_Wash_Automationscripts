@@ -2,6 +2,17 @@ import fs from "node:fs";
 import path from "node:path";
 import { getAuditTimestamp } from "./accessibilityAuditConfig.js";
 
+const resolveScreenshotUri = (violation) => {
+	if (violation._screenshot) return violation._screenshot;
+	if (violation._screenshotPath) {
+		try {
+			const base64 = fs.readFileSync(violation._screenshotPath).toString("base64");
+			return `data:image/png;base64,${base64}`;
+		} catch {}
+	}
+	return null;
+};
+
 const SEVERITY_WEIGHTS = {
 	critical: 10,
 	serious: 5,
@@ -210,6 +221,11 @@ const buildMarkdownReport = (summary, results) => {
 					? `Refer ${violation.helpUrl} for remediation guidance.`
 					: "Review and remediate based on WCAG guidance.";
 
+				const screenshotUri = resolveScreenshotUri(violation);
+				const screenshotLines = screenshotUri
+					? ["", `![Highlighted violation — ${violation.id}](${screenshotUri})`, ""]
+					: [];
+
 				return [
 					`#### ${index + 1}. ${violation.help || violation.id || "Issue"}`,
 					`- **WCAG Criterion:** ${wcagCriterion}`,
@@ -223,6 +239,7 @@ const buildMarkdownReport = (summary, results) => {
 					"```css",
 					affectedSelector,
 					"```",
+					...screenshotLines,
 				].join("\n");
 			}).join("\n\n");
 

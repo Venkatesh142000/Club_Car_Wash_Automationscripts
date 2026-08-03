@@ -54,7 +54,8 @@
     "clean:results": "rm -rf test-results playwright-report",
     "test:db": "playwright test tests/db.spec.js",
     "test:allure-report": "allure generate allure-results --clean -o allure-report",
-    "test:allure-reportopen": "allure open allure-report"
+    "test:allure-reportopen": "allure open allure-report",
+    "test:a11y:auditor": "playwright test tests/accessibilityAuditor.spec.js --project=chromium"
   },
   "keywords": [],
   "author": "KishorKumar D",
