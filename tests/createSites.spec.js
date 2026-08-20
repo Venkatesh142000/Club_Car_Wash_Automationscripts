@@ -2,8 +2,6 @@ import {test,expect} from '../fixtures/baseFixture.js'
 
 test('Site Creation',async({loginPage,topNavigation,sitesPage,randomData})=>{
 
-    test.setTimeout(60000); // Set timeout to 60 seconds
-
     await topNavigation.openSites();
     await sitesPage.clickNewSiteButton();
     await sitesPage.enterSiteId(randomData.randomAlphaNumericName);
@@ -15,13 +13,10 @@ test('Site Creation',async({loginPage,topNavigation,sitesPage,randomData})=>{
     await sitesPage.selectState('Alabama');
     await sitesPage.enterZipCode(randomData.randomZipCode);
     await sitesPage.clickCreateSiteButton();
-
-    await sitesPage.deleteCreatedSite();
+    await expect(sitesPage.successMessage).toContainText('Site successfully created.');
 })
 
-test('Create Site Details', async({loginPage,topNavigation,sitesPage})=>{
-
-    test.setTimeout(60000);
+test('Create Site Details', async({loginPage,topNavigation,sitesPage , randomData})=>{
 
     await topNavigation.openSites();
     await sitesPage.clickNewSiteButton();
@@ -42,11 +37,10 @@ test('Create Site Details', async({loginPage,topNavigation,sitesPage})=>{
     
     // Create the site
     await sitesPage.clickCreateSiteButton();
+    await expect(sitesPage.successMessage).toContainText('Site successfully created.');
 })
 
-test('Update Site Details', async({loginPage,topNavigation,sitesPage})=>{
-
-    test.setTimeout(60000);
+test('Update Site Details', async({loginPage,topNavigation,sitesPage , randomData})=>{
 
     // First, create a site
     await topNavigation.openSites();
@@ -62,29 +56,29 @@ test('Update Site Details', async({loginPage,topNavigation,sitesPage})=>{
     await sitesPage.selectState('Massachusetts');
     await sitesPage.enterZipCode(randomData.randomZipCode);
     await sitesPage.clickCreateSiteButton();
+    await expect(sitesPage.successMessage).toContainText('Site successfully created.');
 
-    
     // Click on the site to open details
     await sitesPage.clickEditSiteDetailsSection();
     
     // Update site details
-    await sitesPage.enterSiteName(f`Updated ${sitename}`);
+    await sitesPage.enterSiteName(`Updated ${sitename}`);
     await sitesPage.enterAddress1(randomData.randomAddress);
     await sitesPage.enterCity(randomData.randomCity);
     await sitesPage.enterZipCode(randomData.randomZipCode);
     
     // Save changes by clicking create/update button
     await sitesPage.saveEditSiteDetails();
+    await expect(sitesPage.successMessage).toContainText('Site successfully updated.');
 })
 
-test('Delete Site', async({loginPage,topNavigation,sitesPage})=>{
-
-    test.setTimeout(60000);
+test('Delete Site', async({loginPage,topNavigation,sitesPage , randomData})=>{
 
     // First, create a site to delete
     await topNavigation.openSites();
     await sitesPage.clickNewSiteButton();
     
+    const sitename = randomData.randomName;
     await sitesPage.enterSiteId(randomData.randomAlphaNumericName);
     await sitesPage.enterSiteName(sitename);
     await sitesPage.selectSiteType('Test');
@@ -94,7 +88,9 @@ test('Delete Site', async({loginPage,topNavigation,sitesPage})=>{
     await sitesPage.selectState('California');
     await sitesPage.enterZipCode(randomData.randomZipCode);
     await sitesPage.clickCreateSiteButton();
+    await expect(sitesPage.successMessage).toContainText('Site successfully created.');
     
     // Delete the site
     await sitesPage.deleteCreatedSite();
+    await expect(sitesPage.successMessage).toContainText('Site successfully deleted.');
 })

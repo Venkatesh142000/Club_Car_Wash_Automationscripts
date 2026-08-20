@@ -31,6 +31,9 @@ export class Sites {
         this.createSiteButton = page.getByRole('button', { name: 'Create Site' });
         this.cancelButton = page.getByRole('button', { name: 'Cancel' });
 
+        //Create and Update Success Message
+        this.successMessage = page.getByTestId('message-component');
+
         //Delete Site
         this.deleteActionDropdown = page.getByRole('button',{name:'Action'});
         this.deleteSiteOption = page.getByRole('menuitem',{name:'Delete Site'});
