@@ -51,6 +51,9 @@ export default class ProductsPage {
 
         //Back to product list
         this.allProducts = page.getByRole('button',{name:'All Products'});
+
+        //Create and Update Success Message
+        this.successMessage = page.getByTestId('message-component');
     }
 
     // Page Header Methods

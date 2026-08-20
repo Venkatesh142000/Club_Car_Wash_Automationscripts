@@ -24,7 +24,7 @@ test('Verify New Product form opens @smoke', async ({ loginPage, topNavigation, 
     await topNavigation.openCatalog();
     await leftNavigation.openProducts();
 
-    await productsPage.clickNewProductButton();
+    await productsPage.clickNewProduct();
 
     await expect(productsPage.productNameInput).toBeVisible();
     await expect(productsPage.productTypeDropdown).toBeVisible();
@@ -42,13 +42,15 @@ test('Verify Products table is displayed @smoke', async ({ loginPage, topNavigat
 
 
 
-test.only('Login + Create Gift Card Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage , randomData}) => {
-    test.setTimeout(120000); // Set timeout to 2 minutes for this test
+test('Login + Create Gift Card Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage , randomData}) => {
+    
     await topNavigation.openCatalog();
     await leftNavigation.openProducts();
 
+    const giftCardName = `Gift Card - ${randomData.randomName} ${Date.now()}`;
+
     await productsPage.clickNewProduct();
-    await productsPage.fillProductName('Smoke Product');
+    await productsPage.fillProductName(giftCardName);
     await productsPage.selectProductType('Gift Card');
    // await productsPage.selectProductStatus('Active'); //bydefault it is active
     await productsPage.fillFixedPrice('Yes');
@@ -57,16 +59,19 @@ test.only('Login + Create Gift Card Product @smoke', async ({ loginPage, topNavi
     await productsPage.clickCreateProductButton();
 
     await productsPage.page.waitForLoadState('networkidle');
+    await expect(productsPage.successMessage).toContainText('Product SKU successfully created.');
     await productsPage.clickAllProducts();
 });
 
-test.only('Login + Create Prepaid Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage }) => {
-    test.setTimeout(120000); // Set timeout to 2 minutes for this test
+test('Login + Create Prepaid Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage , randomData}) => {
+    
     await topNavigation.openCatalog();
     await leftNavigation.openProducts();
 
+    const prePaidName = `Prepaid - ${randomData.randomName} ${Date.now()}`;
+
     await productsPage.clickNewProduct();
-    await productsPage.fillProductName('Smoke Prepaid Product');
+    await productsPage.fillProductName(prePaidName);
     await productsPage.selectProductType('Prepaid');
    // await productsPage.selectProductStatus('Active'); //bydefault it is active
     await productsPage.selectRetailWashType('ROOKIE');
@@ -75,16 +80,19 @@ test.only('Login + Create Prepaid Product @smoke', async ({ loginPage, topNaviga
     await productsPage.clickCreateProductButton();
 
     await productsPage.page.waitForLoadState('networkidle');
+    await expect(productsPage.successMessage).toContainText('Product SKU successfully created.');
     await productsPage.clickAllProducts();
 });
 
-test.only('Login + Create Merchandise Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage , randomData }) => {
-    test.setTimeout(120000); // Set timeout to 2 minutes for this test
+test('Login + Create Merchandise Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage , randomData }) => {
+    
     await topNavigation.openCatalog();
     await leftNavigation.openProducts();
 
+    const merchandiseName = `Prepaid - ${randomData.randomName} ${Date.now()}`;
+    
     await productsPage.clickNewProduct();
-    await productsPage.fillProductName('Smoke Merchandise Product');
+    await productsPage.fillProductName(merchandiseName);
     await productsPage.selectProductType('Merchandise');
    // await productsPage.selectProductStatus('Active'); //bydefault it is active
     await productsPage.fillMerchandisePrice(randomData.randomWholeNumber);
@@ -92,34 +100,40 @@ test.only('Login + Create Merchandise Product @smoke', async ({ loginPage, topNa
     await productsPage.clickCreateProductButton();
 
     await productsPage.page.waitForLoadState('networkidle');
+    await expect(productsPage.successMessage).toContainText('Product SKU successfully created.');
     await productsPage.clickAllProducts();
 });
 
-test.only('Login + Create Tip Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage }) => {
-    test.setTimeout(120000); // Set timeout to 2 minutes for this test
+test('Login + Create Tip Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage }) => {
+    
     await topNavigation.openCatalog();
     await leftNavigation.openProducts();
 
+    const tipName = `Tip - ${randomData.randomName} ${Date.now()}`;
+
     await productsPage.clickNewProduct();
-    await productsPage.fillProductName('Smoke Tip Product');
+    await productsPage.fillProductName(tipName);
     await productsPage.selectProductType('Tip');
    // await productsPage.selectProductStatus('Active'); //bydefault it is active
     await productsPage.clickCreateProductButton();
 
     await productsPage.page.waitForLoadState('networkidle');
+    await expect(productsPage.successMessage).toContainText('Product SKU successfully created.');
     await productsPage.clickAllProducts();
 });
 
-test.only('Login + Create Donation Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage }) => {
-    test.setTimeout(120000); // Set timeout to 2 minutes for this test
+test('Login + Create Donation Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage }) => {
     await topNavigation.openCatalog();
     await leftNavigation.openProducts();
 
+    const donationName = `Donation - ${randomData.randomName} ${Date.now()}`;
+
     await productsPage.clickNewProduct();
-    await productsPage.fillProductName('Smoke Donation Product');
+    await productsPage.fillProductName(donationName);
     await productsPage.selectProductType('Donation');
    // await productsPage.selectProductStatus('Active'); //bydefault it is active
     await productsPage.clickCreateProductButton();
+    await expect(productsPage.successMessage).toContainText('Product SKU successfully created.');
 
     await productsPage.page.waitForLoadState('networkidle');
     await productsPage.clickAllProducts();
