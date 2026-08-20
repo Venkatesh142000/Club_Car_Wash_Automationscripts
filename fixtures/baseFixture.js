@@ -1,93 +1,67 @@
-import { test as base } from "@playwright/test";
-import LoginPage from "../pages/loginPage.js";
-import AddToCart from "../pages/addToCartPage.js";
-import CheckOut from "../pages/checkOutPage.js"
-import Products from "../pages/productsPage.js"
-import AutomationLoginPage from "../pages/automationLoginPage.js";
-import AutomationHomePage from "../pages/automationHomePage.js";
-import {generateCheckoutCustomer} from "../utils/fakerHelper.js";
-import {ApiBase} from "../Api/BaseLayer.js";
-import { ApiClient } from "../Api/clientLayer.js";
-import { PayloadBuilder } from "../utils/payLoadBuilder.js";
-import { MySqlHelper } from "../db/mysqlHelper.js";
+import {test as base} from '@playwright/test'
+import LoginPage from '../pages/auth/loginPage.js';
+import TopNavigation from '../pages/navigation/topNavigation.js';
+import LeftNavigation from '../pages/navigation/leftNavigation.js';
+import PlansPage from '../pages/catalog/plansPage.js';
+import AddOnsPage from '../pages/catalog/addOnsPage.js';
+import ProductsPage from '../pages/catalog/productsPage.js';    
+import RetailWashPage from '../pages/catalog/retailWashPage.js';
+import { GroupsPage } from '../pages/groups/groupsPage.js';
+import { Sites } from '../pages/sites/sitesPage.js'
+import { generateRandomData } from '../utils/fakerHelper.js';
 
 export const test = base.extend({
-	
 
-	
-	loginPage:async({page,isMobile},use)=>{
+    randomData : async({},use)=>{
+        const randomData = generateRandomData();
+        await use(randomData)
+    },
 
-		const loginpage=new LoginPage(page, isMobile)
-		await use(loginpage)
-	},
+    loginPage : async({page},use)=>{
+        const login = new LoginPage(page)
+        await login.goto()
+        await login.enterUsername()
+        await login.enterPassword()
+        await login.handleStaySignedIn()
+        await login.waitForSitesPage()
+        await use(login)
+    },
 
-	automationLoginPage:async({page,isMobile},use)=>{
+    topNavigation : async({page},use)=>{
+        const topNav = new TopNavigation(page)
+        await use(topNav)
+    },
 
-		const automationLoginPage=new AutomationLoginPage(page, isMobile)
-		await use(automationLoginPage)
-	},
+    leftNavigation : async({page},use)=>{
+        const leftNav = new LeftNavigation(page)
+        await use(leftNav)
+    },
 
-	automationHomePage:async({page,isMobile},use)=>{
+    plansPage : async({page},use)=>{
+        const plansPage = new PlansPage(page)
+        await use(plansPage)
+    },
 
-		const automationHomePage=new AutomationHomePage(page, isMobile)
-		await use(automationHomePage)
-	},
-
-	addToCartPage:async({page,isMobile},use)=>{
-
-
-		const addtoCartPage=new AddToCart(page,isMobile)
-		await use(addtoCartPage);
-
-
-	},
-	checkOutPage:async({page,isMobile},use)=>{
-
-		const checkoutPage=new CheckOut(page,isMobile)
-		await use(checkoutPage);
-	},
-	productPage:async({page,isMobile},use)=>{
-
-		const productPage=new Products(page,isMobile)
-		await use(productPage)
-	},
-
-	cust_details : async({page,isMobile},use)=>{
-		const cust_details = generateCheckoutCustomer()
-		await use(cust_details)
-	},
-
-	apiContext: async ({}, use) => {
-		const context = await ApiBase.createAPIContext();
-		try {
-			await use(context);
-		} finally {
-			await context.dispose();
-		}
-	},
-
-  apiClient: async ({ apiContext }, use) => {
-    const client = new ApiClient(apiContext);
-    await use(client);
-  },
-
-	  payLoader: async ({}, use) => {
-    const payLoader = new PayloadBuilder();
-    await use(payLoader);
-  },
-
-  dbHelper: async ({}, use) => {
-    const dbHelper = new MySqlHelper();
-    try {
-      await use(dbHelper);
-    } finally {
-      await dbHelper.disconnect();
+    addOnsPage : async({page},use)=>{
+        const addOnsPage = new AddOnsPage(page)
+        await use(addOnsPage)
+    },
+    productsPage : async({page},use)=>{
+        const productsPage = new ProductsPage(page)
+        await use(productsPage)
+    },
+    retailWashPage : async({page},use)=>{
+        const retailWashPage = new RetailWashPage(page)
+        await use(retailWashPage)
+    },
+    groupsPage : async({page},use)=>{
+        const groupsPage = new GroupsPage(page)
+        await use(groupsPage)
+    },
+    sitesPage : async({page},use)=>{
+        await use(new Sites(page))
     }
-  },
 
-  
-
-	
 });
 
 export const expect = test.expect;
