@@ -26,6 +26,9 @@ export default class RetailWashPage {
         //Create Retail Wash Button
         this.createRetailWashButton = page.getByRole('button', { name: 'Create Retail Wash' });
 
+        //Create and Update Success Message
+        this.successMessage = page.getByTestId('message-component');
+
         //Retail Washes List
         this.allRetailWashlist = page.getByRole('button', { name: 'All Retail Washes' });
         this.deleteRetailWashButton = page.getByRole('button', {name : 'Delete Retail Wash'});

@@ -20,7 +20,9 @@ test('Verify Retail Washes page components are displayed', async ({loginPage,top
     await expect(retailWashPage.newRetailWashButton).toBeVisible();
 });
 
-test.only('Login + Create Retail Wash and Delete', async ({loginPage, topNavigation, leftNavigation, retailWashPage, randomData}) => {
+test('Login + Create Retail Wash and Delete Retail Wash', async ({loginPage, topNavigation, leftNavigation, retailWashPage, randomData}) => {
+
+   // Login through fixture
 
     await topNavigation.openCatalog();
     await leftNavigation.openRetailWashes();
@@ -30,7 +32,7 @@ test.only('Login + Create Retail Wash and Delete', async ({loginPage, topNavigat
     const retailWashName = `E2E RetailWash ${randomData.randomGroupName} ${Date.now()}`;
 
     await retailWashPage.fillRetailWashName(retailWashName);
-    await retailWashPage.selectWashType('MVP');
+    await retailWashPage.selectWashType(randomData.randomWashType);
     await retailWashPage.selectStatus('Active');
     await retailWashPage.fillPrice(randomData.randomNumber);
     await retailWashPage.selectTaxableOption('Yes');
@@ -39,6 +41,7 @@ test.only('Login + Create Retail Wash and Delete', async ({loginPage, topNavigat
     expect(await retailWashPage.isCreateButtonEnabled()).toBeTruthy();
     await retailWashPage.clickCreateRetailWashButton();    
     await retailWashPage.page.waitForLoadState('networkidle');
+    await expect(retailWashPage.successMessage).toContainText('Retail Wash SKU successfully created');
     await retailWashPage.clickAllRetailWashesList();
 
     // Find and open created retail wash
@@ -51,7 +54,7 @@ test.only('Login + Create Retail Wash and Delete', async ({loginPage, topNavigat
 
     // Delete and verify
     await retailWashPage.deleteRetailWash();
-    await retailWashPage.page.waitForTimeout(2000);
+    await expect(retailWashPage.successMessage).toContainText('Retail Wash SKU successfully deleted.');
 
     await retailWashPage.clearSearch();
     await retailWashPage.searchRetailWash(retailWashName);
@@ -69,7 +72,7 @@ test.skip('Login + Create 500 Retail Washes', async ({ loginPage, topNavigation,
 
     const washTypes = ['ROOKIE', 'VIP', 'ELITE', 'MVP'];
 
-    for (let i = 324; i <= 500; i++) {
+    for (let i = 0; i <= 500; i++) {
 
         await retailWashPage.clickNewRetailWashButton();
 
