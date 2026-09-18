@@ -6,7 +6,7 @@ export default class RetailWashPage {
         this.page = page;
         
         //Page Headers
-        this.title = page.locator("div[title='Retail Washes']");
+        this.title = page.locator("[title='Retail Washes']");
         this.showInactiveCheckbox = page.getByRole('checkbox',{name:'Show Inactive'});
         this.searchInput = this.page.getByRole('textbox', {name: 'Search',exact: true});        
         this.newRetailWashButton = page.getByRole('button', { name: 'New Retail Wash' });

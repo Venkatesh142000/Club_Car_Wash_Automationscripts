@@ -54,8 +54,8 @@ test('Login + Create Gift Card Product @smoke', async ({ loginPage, topNavigatio
     await productsPage.selectProductType('Gift Card');
    // await productsPage.selectProductStatus('Active'); //bydefault it is active
     await productsPage.fillFixedPrice('Yes');
-    await productsPage.fillGiftCardPrice(randomData.randomWholeNumber);
-    await productsPage.fillGiftCardMaxValue(randomData.randomWholeNumber);
+    await productsPage.fillGiftCardPrice(randomData.randomWholeNumber());
+    await productsPage.fillGiftCardMaxValue(randomData.randomWholeNumber());
     await productsPage.clickCreateProductButton();
 
     await productsPage.page.waitForLoadState('networkidle');
@@ -95,7 +95,7 @@ test('Login + Create Merchandise Product @smoke', async ({ loginPage, topNavigat
     await productsPage.fillProductName(merchandiseName);
     await productsPage.selectProductType('Merchandise');
    // await productsPage.selectProductStatus('Active'); //bydefault it is active
-    await productsPage.fillMerchandisePrice(randomData.randomWholeNumber);
+    await productsPage.fillMerchandisePrice(randomData.randomWholeNumber());
    // await productsPage.selectMerchandiseTaxable('Yes');
     await productsPage.clickCreateProductButton();
 
@@ -104,7 +104,7 @@ test('Login + Create Merchandise Product @smoke', async ({ loginPage, topNavigat
     await productsPage.clickAllProducts();
 });
 
-test('Login + Create Tip Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage }) => {
+test('Login + Create Tip Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage , randomData}) => {
     
     await topNavigation.openCatalog();
     await leftNavigation.openProducts();
@@ -122,7 +122,7 @@ test('Login + Create Tip Product @smoke', async ({ loginPage, topNavigation, lef
     await productsPage.clickAllProducts();
 });
 
-test('Login + Create Donation Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage }) => {
+test('Login + Create Donation Product @smoke', async ({ loginPage, topNavigation, leftNavigation, productsPage,randomData }) => {
     await topNavigation.openCatalog();
     await leftNavigation.openProducts();
 

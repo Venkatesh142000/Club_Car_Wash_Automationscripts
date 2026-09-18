@@ -9,7 +9,7 @@ export default class AddonsListPage {
         //Page Headers
         this.pageTitle = page.locator("h1[title='Add-ons']");
         this.showInactiveCheckbox = page.getByRole('checkbox',{name:'Show Inactive'});
-        this.searchInput = this.page.getByRole('textbox', {name: 'Search',exact: true});
+        this.searchInput = this.page.getByRole('textbox', {name: 'Search',exact: true}).first();
         this.newAddonButton = page.getByRole('button', { name: 'New Add-on' });
 
         //Table Headers and Rows
@@ -20,11 +20,11 @@ export default class AddonsListPage {
 
         //Create Add On
         this.addonNameInput = page.getByPlaceholder('Add-On Name');
-        this.addonComponentDropdown = page.getByRole('combobox', { name: 'Component *' });
+        this.addonComponentDropdown = page.getByRole('combobox', { name: 'Component' });
         this.addonStatusDropdown = page.getByRole('combobox', { name: 'Status' });
         
         this.priceInput = page.getByRole('textbox', { name: 'Price' });
-        this.taxabledropdown = page.getByRole('combobox', { name: 'Taxable *' });
+        this.taxabledropdown = page.getByRole('combobox', { name: 'Taxable' });
         this.schedulePriceCheckbox = page.getByRole('checkbox', { name: 'Schedule Price Change' });
         this.schedulePriceInput = page.getByRole('textbox', { name: 'Scheduled Price' });
         this.effectiveDateInput = page.getByRole('button', { name: 'Effective Date' });
@@ -125,6 +125,10 @@ export default class AddonsListPage {
 
     // Price Methods
     async fillPrice(price) {
+        if (!Number.isFinite(Number(price)) || Number(price) <= 0) {
+            throw new RangeError('Add-on price must be greater than zero');
+        }
+
         await clearAndType({locator:this.priceInput, value:price});
     }
 
@@ -152,6 +156,10 @@ export default class AddonsListPage {
     }
 
     async fillScheduledPrice(price) {
+        if (!Number.isFinite(Number(price)) || Number(price) <= 0) {
+            throw new RangeError('Scheduled add-on price must be greater than zero');
+        }
+
         await clearAndType({locator:this.schedulePriceInput, value:price});
     }
 
@@ -164,10 +172,28 @@ export default class AddonsListPage {
         await click({locator:this.effectiveDateInput});
     }
 
-    async setEffectiveDate(date) {
+    async setEffectiveDate(daysFromTomorrow = 0) {
+        if (!Number.isInteger(daysFromTomorrow) || daysFromTomorrow < 0) {
+            throw new TypeError('daysFromTomorrow must be a non-negative integer');
+        }
+
+        const effectiveDate = new Date();
+        effectiveDate.setHours(12, 0, 0, 0);
+        effectiveDate.setDate(effectiveDate.getDate() + daysFromTomorrow + 1);
+
+        const weekday = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(effectiveDate);
+        const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(effectiveDate);
+        const day = effectiveDate.getDate();
+        const year = effectiveDate.getFullYear();
+        const dateLabel = new RegExp(
+            `${weekday}, ${month} ${day}(?:st|nd|rd|th)?, ${year}`,
+            'i'
+        );
+
         await click({locator:this.effectiveDateInput});
-        await clearAndType({locator:this.effectiveDateInput, value:date});
-        // Note: Date picker interaction may need adjustment based on actual picker UI
+        await click({
+            locator:this.page.getByRole('button', { name: dateLabel }).filter({ visible: true })
+        });
     }
 
     // Complete Form Submission Methods

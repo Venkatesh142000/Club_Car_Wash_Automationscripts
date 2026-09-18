@@ -6,9 +6,9 @@ export default class PlansListPage {
         this.page = page;
 
         //Page Headers
-        this.title = page.locator("div[title='Plans']");
+        this.title = page.locator("h1[title='Plans']");
         this.showInactiveCheckbox = page.getByRole('checkbox',{name:'Show Inactive'});
-        this.searchInput = this.page.getByRole('textbox', {name: 'Search',exact: true});        
+        this.searchInput = this.page.getByPlaceholder('Search').first();
         this.newPlanButton = page.getByRole('button', { name: 'New Plan' });
 
         //Table Headers and Rows
@@ -33,7 +33,7 @@ export default class PlansListPage {
         this.washPerLimitInput = page.locator("input[name='washLimitPerWashPeriod']");
 
         //Plan Structure for Unit Based Types
-        this.unitQuantityHeader = page.locator('#numberOfWashes');
+        this.unitQuantity = page.locator('#numberOfWashes');
 
         //Pricing details
         this.priceInput = page.getByPlaceholder('Price');
@@ -153,8 +153,8 @@ export default class PlansListPage {
     }
 
     async enterUnitQuantity(quantity) {
-        await scrollIntoView({locator:this.unitQuantityHeader});
-        await clearAndType({locator:this.unitQuantityHeader, value:quantity});
+        await scrollIntoView({locator:this.unitQuantity});
+        await clearAndType({locator:this.unitQuantity, value:quantity});
     }
 
     async selectTaxable(taxableOption) {

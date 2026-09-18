@@ -11,7 +11,7 @@ export class GroupsPage {
         //New Group Creation
         this.groupNameInput = page.getByRole('textbox', { name: 'Group Name' });
         this.groupTypeDropdown = page.getByRole('combobox', { name: 'Group Type' });
-        this.taxRateInput = page.getByRole('textbox', { name: 'Tax Rate *' });
+        this.taxRateInput = page.getByRole('textbox', { name: 'Tax Rate' });
 
         //Create Group Button
         this.createGroupButton = page.getByRole('button', { name: 'Create Group' });

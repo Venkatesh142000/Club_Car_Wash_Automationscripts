@@ -11,7 +11,7 @@ export default class LoginPage{
     }
 
     async goto(){
-        await this.page.goto(process.env.BASE_URL);
+        await this.page.goto(process.env.BASE_STAGE_URL);
     }
 
     async enterUsername(){

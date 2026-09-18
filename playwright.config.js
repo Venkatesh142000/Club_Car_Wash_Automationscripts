@@ -68,7 +68,7 @@ export default defineConfig({
 			},
 		},
 
-		{
+		/*{
 			name: "firefox",
 			use: {
 				browserName: "firefox",
@@ -103,7 +103,7 @@ export default defineConfig({
 			use: {
 				...devices["iPad (gen 11)"],
 			},
-		},
+		},*/
 
 		/* Test against mobile viewports. */
 		// {

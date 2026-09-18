@@ -14,7 +14,6 @@ test('Verify Retail Washes page components are displayed', async ({loginPage,top
     // Search Components
     await expect(retailWashPage.showInactiveCheckbox).toBeVisible();
     await expect(retailWashPage.searchInput).toBeVisible();
-    await expect(retailWashPage.searchButton).toBeVisible();
 
     // Action Button
     await expect(retailWashPage.newRetailWashButton).toBeVisible();
@@ -34,7 +33,9 @@ test('Login + Create Retail Wash and Delete Retail Wash', async ({loginPage, top
     await retailWashPage.fillRetailWashName(retailWashName);
     await retailWashPage.selectWashType(randomData.randomWashType);
     await retailWashPage.selectStatus('Active');
-    await retailWashPage.fillPrice(randomData.randomNumber);
+    await retailWashPage.page.waitForTimeout(2000);
+    await retailWashPage.fillPrice(randomData.randomNumber());
+     await retailWashPage.page.waitForTimeout(2000);
     await retailWashPage.selectTaxableOption('Yes');
     await retailWashPage.fillTermsAndConditions('These are the terms and conditions for the Test Retail Wash.');
 

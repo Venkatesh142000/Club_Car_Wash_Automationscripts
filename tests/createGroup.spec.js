@@ -5,9 +5,13 @@ test.describe('Groups - Create', () => {
         await topNavigation.openGroups();
         await leftNavigation.openAllGroups();
 
+        const groupType = randomData.randomGroupType;
         await groupsPage.clickNewGroupButton();
         await groupsPage.enterNewGroupname(randomData.randomGroupName);
-        await groupsPage.selectGroupType(randomData.randomGroupType);
+        await groupsPage.selectGroupType(groupType);
+        if(groupType === 'Tax') {
+            await groupsPage.enterTaxRate(randomData.randomNumber());
+        }
         await groupsPage.clickCreateGroupButton();
 
         await groupsPage.clickAllGroupsButton();
@@ -21,9 +25,13 @@ test.describe('Groups - Create', () => {
         await leftNavigation.openAllGroups();
 
         // Create group
+        const groupType = randomData.randomGroupType;
         await groupsPage.clickNewGroupButton();
         await groupsPage.enterNewGroupname(randomData.randomGroupName);
-        await groupsPage.selectGroupType(randomData.randomGroupType);
+        await groupsPage.selectGroupType(groupType);
+        if(groupType === 'Tax') {
+            await groupsPage.enterTaxRate(randomData.randomNumber());
+        }
         await groupsPage.clickCreateGroupButton();
 
         await groupsPage.clickAllGroupsButton();
@@ -32,6 +40,7 @@ test.describe('Groups - Create', () => {
         // Ensure the created row exists
         const targetRow = groupsPage.page.locator('table tbody tr', { hasText: randomData.randomGroupName }).first();
         await expect(targetRow).toBeVisible();
+        await targetRow.click();
 
         // Click delete within the row (assumes a delete button exists in the row)
         const deleteBtn = targetRow.getByRole('button', { name: 'Delete' });

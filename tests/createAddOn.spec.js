@@ -53,7 +53,7 @@ test('Verify Add-On table is displayed@smoke', async ({ loginPage,topNavigation,
 });
 
 
-test.only('Login + Create Add-On',async({loginPage,topNavigation,leftNavigation,addOnsPage,randomData})=>{
+test('Login + Create Add-On',async({loginPage,topNavigation,leftNavigation,addOnsPage,randomData})=>{
   
     await topNavigation.openCatalog()
     await leftNavigation.openAddOns()
@@ -62,7 +62,7 @@ test.only('Login + Create Add-On',async({loginPage,topNavigation,leftNavigation,
     const addonName = `E2E Addon ${randomData.randomName} ${Date.now()}`;
     await addOnsPage.fillAddonName(addonName);
     await addOnsPage.selectAddonComponent(randomData.randomAddonComponent);
-    await addOnsPage.fillPrice(randomData.randomNumber);
+    await addOnsPage.fillPrice(randomData.randomPrice());
     await addOnsPage.clickCreateAddonButton();
     await addOnsPage.page.waitForLoadState('networkidle');
     await expect(addOnsPage.successMessage).toContainText('Add-On Wash SKU successfully created');
@@ -76,16 +76,23 @@ test('Login + Create Add-On with Schedule Price',async({loginPage,topNavigation,
     await addOnsPage.clickNewAddonButton()
     
     const addonName = `E2E Addon ${randomData.randomName} ${Date.now()}`;
+    const price = randomData.randomPrice();
+    let scheduledPrice = randomData.randomPrice();
+    while (scheduledPrice === price) {
+        scheduledPrice = randomData.randomPrice();
+    }
+
     await addOnsPage.fillAddonName(addonName)
     await addOnsPage.selectAddonComponent(randomData.randomAddonComponent);
-    await addOnsPage.fillPrice(randomData.randomNumber);
+    await addOnsPage.fillPrice(price);
     await addOnsPage.toggleSchedulePrice();
-    await addOnsPage.fillScheduledPrice(randomData.randomNumber)
+    await addOnsPage.fillScheduledPrice(scheduledPrice);
+    await addOnsPage.setEffectiveDate();
     await addOnsPage.clickCreateAddonButton()
     await expect(addOnsPage.successMessage).toContainText('Add-On Wash SKU successfully created');
 });
 
-test('Create + Edit Add-On', async ({ loginPage, topNavigation, leftNavigation, addOnsPage, randomData }) => {
+test.only('Create + Edit Add-On', async ({ loginPage, topNavigation, leftNavigation, addOnsPage, randomData }) => {
 
     await topNavigation.openCatalog();
     await leftNavigation.openAddOns();
@@ -95,7 +102,7 @@ test('Create + Edit Add-On', async ({ loginPage, topNavigation, leftNavigation, 
     const addonName = `E2E Addon ${randomData.randomName} ${Date.now()}`;
     await addOnsPage.fillAddonName(addonName);
     await addOnsPage.selectAddonComponent(randomData.randomAddonComponent);
-    await addOnsPage.fillPrice(randomData.randomNumber);
+    await addOnsPage.fillPrice(randomData.randomPrice());
     await addOnsPage.clickCreateAddonButton();
     await addOnsPage.page.waitForLoadState('networkidle');
     await expect(addOnsPage.successMessage).toContainText('Add-On Wash SKU successfully created');
@@ -111,11 +118,10 @@ test('Create + Edit Add-On', async ({ loginPage, topNavigation, leftNavigation, 
 
     // Edit details using page object methods
     const editedName = addonName + ' - Edited';
-    const editedPrice = randomData.randomNumber;
     await addOnsPage.openEditAddonDetails();
     await addOnsPage.updateAddonName(editedName);
     await addOnsPage.saveEditChanges();
-    await expect(addOnsPage.successMessage).toContainText('Add-On Wash SKU successfully updated.');
+    await expect(addOnsPage.successMessage).toContainText('Add-on SKU successfully updated.');
 
     // Verify edit persisted
     await addOnsPage.searchAddon(editedName);
@@ -135,7 +141,7 @@ test('Create + Delete Add-On', async ({ loginPage, topNavigation, leftNavigation
     const addonName = `E2E Delete Addon ${randomData.randomName} ${Date.now()}`;
     await addOnsPage.fillAddonName(addonName);
     await addOnsPage.selectAddonComponent(randomData.randomAddonComponent);
-    await addOnsPage.fillPrice(randomData.randomNumber);
+    await addOnsPage.fillPrice(randomData.randomPrice());
     await addOnsPage.clickCreateAddonButton();
     await addOnsPage.page.waitForLoadState('networkidle');
     await expect(addOnsPage.successMessage).toContainText('Add-On Wash SKU successfully created');
